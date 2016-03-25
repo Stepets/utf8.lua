@@ -84,8 +84,26 @@ for details see: https://github.com/Stepets/utf8.lua/blob/master/utf8.lua#L470
 
 Of course you can do this trick:
 ```Lua
-local string = require "utf8"
---or even
-string = require "utf8"
+for k,v in pairs(utf8) do
+        string[k] = v
+end
 ```
-this can lead to very strange errors. You were warned.
+But this can lead to very strange errors. You were warned.
+
+A little bit more interesting examples:
+```Lua
+local utf8 = require 'utf8'
+for k,v in pairs(utf8) do
+        string[k] = v
+end
+
+local str = "пыщпыщ ололоо я водитель нло"
+print(str:find("(.л.+)н"))
+-- 8	26	ололоо я водитель 
+
+print(str:gsub("ло+", "보라"))
+-- пыщпыщ о보라보라 я водитель н보라	3
+
+print(str:match("^п[лопыщ ]*я"))
+-- пыщпыщ ололоо я
+```
