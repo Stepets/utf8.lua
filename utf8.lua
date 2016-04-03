@@ -417,7 +417,6 @@ local function binsearch(sortedTable, item, comp)
 			end
 			mid = math.floor((head + tail)/2)
 		end
-	else
 	end
 	if sortedTable[tonumber(head)] == item then
 		return true, tonumber(head)
