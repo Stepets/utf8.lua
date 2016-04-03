@@ -289,7 +289,7 @@ local function utf8reverse (s)
 	local newstr = ""
 
 	while pos > 0 do
-		c = byte(s, pos)
+		local c = byte(s, pos)
 		while c >= 128 and c <= 191 do
 			pos = pos - 1
 			c = byte(s, pos)
