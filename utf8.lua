@@ -237,7 +237,7 @@ local function utf8sub (s, i, j)
 	return sub(s, startByte, endByte)
 end
 
-
+--[[
 -- replace UTF-8 characters based on a mapping table
 local function utf8replace (s, mapping)
 	-- argument checking
@@ -275,6 +275,7 @@ end
 local function utf8lower (s)
 	return utf8replace(s, utf8_uc_lc)
 end
+]]
 
 -- identical to string.reverse except that it supports UTF-8
 local function utf8reverse (s)
@@ -556,6 +557,7 @@ local function classMatchGenerator(class, plain)
 	end
 end
 
+--[[
 -- utf8sub with extra argument, and extra result value
 local function utf8subWithBytes (s, i, j, sb)
 	-- argument defaults
@@ -598,6 +600,7 @@ local function utf8subWithBytes (s, i, j, sb)
 
 	return sub(s, startByte, endByte), endByte + 1
 end
+]]
 
 local cache = setmetatable({},{
 	__mode = 'kv'
