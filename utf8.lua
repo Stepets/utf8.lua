@@ -183,14 +183,14 @@ local function utf8len (s)
 
 	local pos = 1
 	local bytes = len(s)
-	local len = 0
+	local length = 0
 
 	while pos <= bytes do
-		len = len + 1
+		length = length + 1
 		pos = pos + utf8charbytes(s, pos)
 	end
 
-	return len
+	return length
 end
 
 -- functions identically to string.sub except that i and j are UTF-8 characters
@@ -201,7 +201,7 @@ local function utf8sub (s, i, j)
 
 	local pos = 1
 	local bytes = len(s)
-	local len = 0
+	local length = 0
 
 	-- only set l if i or j is negative
 	local l = (i >= 0 and j >= 0) or utf8len(s)
@@ -217,22 +217,22 @@ local function utf8sub (s, i, j)
 	local startByte,endByte = 1,bytes
 
 	while pos <= bytes do
-		len = len + 1
+		length = length + 1
 
-		if len == startChar then
+		if length == startChar then
 			startByte = pos
 		end
 
 		pos = pos + utf8charbytes(s, pos)
 
-		if len == endChar then
+		if length == endChar then
 			endByte = pos - 1
 			break
 		end
 	end
 
-	if startChar > len then startByte = bytes+1   end
-	if endChar   < 1   then endByte   = 0         end
+	if startChar > length then startByte = bytes+1   end
+	if endChar   < 1      then endByte   = 0         end
 
 	return sub(s, startByte, endByte)
 end
@@ -350,31 +350,31 @@ utf8unicode = function(str, i, j, byte_pos)
 
 	if i > j then return end
 
-	local char,bytes
+	local ch,bytes
 
 	if byte_pos then
 		bytes = utf8charbytes(str,byte_pos)
-		char  = sub(str,byte_pos,byte_pos-1+bytes)
+		ch  = sub(str,byte_pos,byte_pos-1+bytes)
 	else
-		char,byte_pos = utf8sub(str,i,i), 0
-		bytes         = #char
+		ch,byte_pos = utf8sub(str,i,i), 0
+		bytes       = #ch
 	end
 
 	local unicode
 
-	if bytes == 1 then unicode = byte(char) end
+	if bytes == 1 then unicode = byte(ch) end
 	if bytes == 2 then
-		local byte0,byte1 = byte(char,1,2)
+		local byte0,byte1 = byte(ch,1,2)
 		local code0,code1 = byte0-0xC0,byte1-0x80
 		unicode = code0*shift_6 + code1
 	end
 	if bytes == 3 then
-		local byte0,byte1,byte2 = byte(char,1,3)
+		local byte0,byte1,byte2 = byte(ch,1,3)
 		local code0,code1,code2 = byte0-0xE0,byte1-0x80,byte2-0x80
 		unicode = code0*shift_12 + code1*shift_6 + code2
 	end
 	if bytes == 4 then
-		local byte0,byte1,byte2,byte3 = byte(char,1,4)
+		local byte0,byte1,byte2,byte3 = byte(ch,1,4)
 		local code0,code1,code2,code3 = byte0-0xF0,byte1-0x80,byte2-0x80,byte3-0x80
 		unicode = code0*shift_18 + code1*shift_12 + code2*shift_6 + code3
 	end
@@ -386,13 +386,13 @@ end
 local function utf8gensub(str, sub_len)
 	sub_len        = sub_len or 1
 	local byte_pos = 1
-	local len      = #str
+	local length   = #str
 	return function(skip)
 		if skip then byte_pos = byte_pos + skip end
 		local char_count = 0
 		local start      = byte_pos
 		repeat
-			if byte_pos > len then return end
+			if byte_pos > length then return end
 			char_count  = char_count + 1
 			local bytes = utf8charbytes(str,byte_pos)
 			byte_pos    = byte_pos+bytes
@@ -400,8 +400,8 @@ local function utf8gensub(str, sub_len)
 		until char_count == sub_len
 
 		local last  = byte_pos-1
-		local sub   = sub(str,start,last)
-		return sub, start, last
+		local slice = sub(str,start,last)
+		return slice, start, last
 	end
 end
 
@@ -564,7 +564,7 @@ local function utf8subWithBytes (s, i, j, sb)
 
 	local pos = sb or 1
 	local bytes = len(s)
-	local len = 0
+	local length = 0
 
 	-- only set l if i or j is negative
 	local l = (i >= 0 and j >= 0) or utf8len(s)
@@ -580,22 +580,22 @@ local function utf8subWithBytes (s, i, j, sb)
 	local startByte,endByte = 1,bytes
 
 	while pos <= bytes do
-		len = len + 1
+		length = length + 1
 
-		if len == startChar then
+		if length == startChar then
 			startByte = pos
 		end
 
 		pos = pos + utf8charbytes(s, pos)
 
-		if len == endChar then
+		if length == endChar then
 			endByte = pos - 1
 			break
 		end
 	end
 
-	if startChar > len then startByte = bytes+1   end
-	if endChar   < 1   then endByte   = 0         end
+	if startChar > length then startByte = bytes+1   end
+	if endChar   < 1      then endByte   = 0         end
 
 	return sub(s, startByte, endByte), endByte + 1
 end
@@ -901,21 +901,21 @@ local function matcherGenerator(regex, plain)
 
 		-- local lastPos = self.str
 		-- local lastByte
-		local char
+		local ch
 		while not self.stop do
 			if self.str < self.stringLen then
 				--[[ if lastPos < self.str then
 					print('last byte', lastByte)
-					char, lastByte = utf8subWithBytes(str, 1, self.str - lastPos - 1, lastByte)
-					char, lastByte = utf8subWithBytes(str, 1, 1, lastByte)
+					ch, lastByte = utf8subWithBytes(str, 1, self.str - lastPos - 1, lastByte)
+					ch, lastByte = utf8subWithBytes(str, 1, 1, lastByte)
 					lastByte = lastByte - 1
 				else
-					char, lastByte = utf8subWithBytes(str, self.str, self.str)
+					ch, lastByte = utf8subWithBytes(str, self.str, self.str)
 				end
 				lastPos = self.str ]]
-				char = utf8sub(str, self.str,self.str)
-				--print('char', char, utf8unicode(char))
-				self.functions[self.func](utf8unicode(char))
+				ch = utf8sub(str, self.str,self.str)
+				--print('char', ch, utf8unicode(ch))
+				self.functions[self.func](utf8unicode(ch))
 			else
 				self.functions[self.func](-1)
 			end
