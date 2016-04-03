@@ -69,13 +69,9 @@ local char    = string.char
 local dump    = string.dump
 local find    = string.find
 local format  = string.format
-local gmatch  = string.gmatch
-local gsub    = string.gsub
 local len     = string.len
 local lower   = string.lower
-local match   = string.match
 local rep     = string.rep
-local reverse = string.reverse
 local sub     = string.sub
 local upper   = string.upper
 
@@ -442,7 +438,7 @@ local function classMatchGenerator(class, plain)
 	local it = utf8gensub(class)
 
 	local skip
-	for c,bs,be in it do
+	for c, _, be in it do
 		skip = be
 		if not ignore and not plain then
 			if c == "%" then
@@ -659,12 +655,12 @@ local function matcherGenerator(regex, plain)
 	end
 
 	local function capture(id)
-		return function(cC)
+		return function(_)
 			local l = matcher.captures[id][2] - matcher.captures[id][1]
 			local captured = utf8sub(matcher.string, matcher.captures[id][1], matcher.captures[id][2])
 			local check = utf8sub(matcher.string, matcher.str, matcher.str + l)
 			if captured == check then
-				for i = 0, l do
+				for _ = 0, l do
 					matcher:nextStr()
 				end
 				matcher:nextFunc()
@@ -674,13 +670,13 @@ local function matcherGenerator(regex, plain)
 		end
 	end
 	local function captureStart(id)
-		return function(cC)
+		return function(_)
 			matcher.captures[id][1] = matcher.str
 			matcher:nextFunc()
 		end
 	end
 	local function captureStop(id)
-		return function(cC)
+		return function(_)
 			matcher.captures[id][2] = matcher.str - 1
 			matcher:nextFunc()
 		end
@@ -712,7 +708,7 @@ local function matcherGenerator(regex, plain)
 		end, skip
 	end
 
-	matcher.functions[1] = function(cC)
+	matcher.functions[1] = function(_)
 		matcher:fullResetOnNextStr()
 		matcher.seqStart = matcher.str
 		matcher:nextFunc()
@@ -844,8 +840,6 @@ local function matcherGenerator(regex, plain)
 	if lastFunc then
 		table.insert(matcher.functions, simple(lastFunc))
 	end
-	lastFunc = nil
-	ignore = nil
 
 	table.insert(matcher.functions, function()
 		if matcher.toEnd and matcher.str ~= matcher.stringLen then
@@ -905,8 +899,8 @@ local function matcherGenerator(regex, plain)
 			s.func = 1
 		end
 
-		local lastPos = self.str
-		local lastByte
+		-- local lastPos = self.str
+		-- local lastByte
 		local char
 		while not self.stop do
 			if self.str < self.stringLen then
@@ -981,7 +975,7 @@ local function replace(repl, args)
 	local ret = ''
 	if type(repl) == 'string' then
 		local ignore = false
-		local num = 0
+		local num
 		for c in utf8gensub(repl) do
 			if not ignore then
 				if c == '%' then
