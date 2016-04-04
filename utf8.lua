@@ -52,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
 -- ABNF from RFC 3629
--- 
+--
 -- UTF8-octets = *( UTF8-char )
 -- UTF8-char   = UTF8-1 / UTF8-2 / UTF8-3 / UTF8-4
 -- UTF8-1      = %x00-7F
@@ -62,20 +62,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -- UTF8-4      = %xF0 %x90-BF 2( UTF8-tail ) / %xF1-F3 3( UTF8-tail ) /
 --               %xF4 %x80-8F 2( UTF8-tail )
 -- UTF8-tail   = %x80-BF
--- 
+--
 
 local byte    = string.byte
 local char    = string.char
 local dump    = string.dump
 local find    = string.find
 local format  = string.format
-local gmatch  = string.gmatch
-local gsub    = string.gsub
 local len     = string.len
 local lower   = string.lower
-local match   = string.match
 local rep     = string.rep
-local reverse = string.reverse
 local sub     = string.sub
 local upper   = string.upper
 
@@ -159,7 +155,7 @@ local function utf8charbytes (s, i)
 		elseif c2 < 128 or c2 > 191 then
 			error("Invalid UTF-8 character")
 		end
-		
+
 		-- validate byte 3
 		if c3 < 128 or c3 > 191 then
 			error("Invalid UTF-8 character")
@@ -187,14 +183,14 @@ local function utf8len (s)
 
 	local pos = 1
 	local bytes = len(s)
-	local len = 0
+	local length = 0
 
 	while pos <= bytes do
-		len = len + 1
+		length = length + 1
 		pos = pos + utf8charbytes(s, pos)
 	end
 
-	return len
+	return length
 end
 
 -- functions identically to string.sub except that i and j are UTF-8 characters
@@ -205,7 +201,7 @@ local function utf8sub (s, i, j)
 
 	local pos = 1
 	local bytes = len(s)
-	local len = 0
+	local length = 0
 
 	-- only set l if i or j is negative
 	local l = (i >= 0 and j >= 0) or utf8len(s)
@@ -219,29 +215,29 @@ local function utf8sub (s, i, j)
 
 	-- byte offsets to pass to string.sub
 	local startByte,endByte = 1,bytes
-	
-	while pos <= bytes do
-		len = len + 1
 
-		if len == startChar then
+	while pos <= bytes do
+		length = length + 1
+
+		if length == startChar then
 			startByte = pos
 		end
 
 		pos = pos + utf8charbytes(s, pos)
 
-		if len == endChar then
+		if length == endChar then
 			endByte = pos - 1
 			break
 		end
 	end
-	
-	if startChar > len then startByte = bytes+1   end
-	if endChar   < 1   then endByte   = 0         end
-	
+
+	if startChar > length then startByte = bytes+1   end
+	if endChar   < 1      then endByte   = 0         end
+
 	return sub(s, startByte, endByte)
 end
 
-
+--[[
 -- replace UTF-8 characters based on a mapping table
 local function utf8replace (s, mapping)
 	-- argument checking
@@ -279,6 +275,7 @@ end
 local function utf8lower (s)
 	return utf8replace(s, utf8_uc_lc)
 end
+]]
 
 -- identical to string.reverse except that it supports UTF-8
 local function utf8reverse (s)
@@ -293,7 +290,7 @@ local function utf8reverse (s)
 	local newstr = ""
 
 	while pos > 0 do
-		c = byte(s, pos)
+		local c = byte(s, pos)
 		while c >= 128 and c <= 191 do
 			pos = pos - 1
 			c = byte(s, pos)
@@ -313,20 +310,20 @@ end
 -- http://developer.coronalabs.com/code/utf-8-conversion-utility
 local function utf8char(unicode)
 	if unicode <= 0x7F then return char(unicode) end
-	
+
 	if (unicode <= 0x7FF) then
 		local Byte0 = 0xC0 + math.floor(unicode / 0x40);
 		local Byte1 = 0x80 + (unicode % 0x40);
 		return char(Byte0, Byte1);
 	end;
-	
+
 	if (unicode <= 0xFFFF) then
 		local Byte0 = 0xE0 +  math.floor(unicode / 0x1000);
 		local Byte1 = 0x80 + (math.floor(unicode / 0x40) % 0x40);
 		local Byte2 = 0x80 + (unicode % 0x40);
 		return char(Byte0, Byte1, Byte2);
 	end;
-	
+
 	if (unicode <= 0x10FFFF) then
 		local code = unicode
 		local Byte3= 0x80 + (code % 0x40);
@@ -334,12 +331,12 @@ local function utf8char(unicode)
 		local Byte2= 0x80 + (code % 0x40);
 		code       = math.floor(code / 0x40)
 		local Byte1= 0x80 + (code % 0x40);
-		code       = math.floor(code / 0x40)  
+		code       = math.floor(code / 0x40)
 		local Byte0= 0xF0 + code;
-		
+
 		return char(Byte0, Byte1, Byte2, Byte3);
 	end;
-	
+
 	error 'Unicode cannot be greater than U+10FFFF!'
 end
 
@@ -351,38 +348,38 @@ local utf8unicode
 utf8unicode = function(str, i, j, byte_pos)
 	i = i or 1
 	j = j or i
-	
+
 	if i > j then return end
-	
-	local char,bytes
-	
-	if byte_pos then 
+
+	local ch,bytes
+
+	if byte_pos then
 		bytes = utf8charbytes(str,byte_pos)
-		char  = sub(str,byte_pos,byte_pos-1+bytes)
+		ch  = sub(str,byte_pos,byte_pos-1+bytes)
 	else
-		char,byte_pos = utf8sub(str,i,i), 0
-		bytes         = #char
+		ch,byte_pos = utf8sub(str,i,i), 0
+		bytes       = #ch
 	end
-	
+
 	local unicode
-	
-	if bytes == 1 then unicode = byte(char) end
+
+	if bytes == 1 then unicode = byte(ch) end
 	if bytes == 2 then
-		local byte0,byte1 = byte(char,1,2)
+		local byte0,byte1 = byte(ch,1,2)
 		local code0,code1 = byte0-0xC0,byte1-0x80
 		unicode = code0*shift_6 + code1
 	end
 	if bytes == 3 then
-		local byte0,byte1,byte2 = byte(char,1,3)
+		local byte0,byte1,byte2 = byte(ch,1,3)
 		local code0,code1,code2 = byte0-0xE0,byte1-0x80,byte2-0x80
 		unicode = code0*shift_12 + code1*shift_6 + code2
 	end
 	if bytes == 4 then
-		local byte0,byte1,byte2,byte3 = byte(char,1,4)
+		local byte0,byte1,byte2,byte3 = byte(ch,1,4)
 		local code0,code1,code2,code3 = byte0-0xF0,byte1-0x80,byte2-0x80,byte3-0x80
 		unicode = code0*shift_18 + code1*shift_12 + code2*shift_6 + code3
 	end
-	
+
 	return unicode,utf8unicode(str, i+1, j, byte_pos+bytes)
 end
 
@@ -390,22 +387,22 @@ end
 local function utf8gensub(str, sub_len)
 	sub_len        = sub_len or 1
 	local byte_pos = 1
-	local len      = #str
+	local length   = #str
 	return function(skip)
 		if skip then byte_pos = byte_pos + skip end
 		local char_count = 0
 		local start      = byte_pos
 		repeat
-			if byte_pos > len then return end
+			if byte_pos > length then return end
 			char_count  = char_count + 1
 			local bytes = utf8charbytes(str,byte_pos)
 			byte_pos    = byte_pos+bytes
-			
+
 		until char_count == sub_len
-		
+
 		local last  = byte_pos-1
-		local sub   = sub(str,start,last)
-		return sub, start, last
+		local slice = sub(str,start,last)
+		return slice, start, last
 	end
 end
 
@@ -421,7 +418,6 @@ local function binsearch(sortedTable, item, comp)
 			end
 			mid = math.floor((head + tail)/2)
 		end
-	else
 	end
 	if sortedTable[tonumber(head)] == item then
 		return true, tonumber(head)
@@ -438,11 +434,11 @@ local function classMatchGenerator(class, plain)
 	local range = false
 	local firstletter = true
 	local unmatch = false
-	
-	local it = utf8gensub(class) 
-	
+
+	local it = utf8gensub(class)
+
 	local skip
-	for c,bs,be in it do
+	for c, _, be in it do
 		skip = be
 		if not ignore and not plain then
 			if c == "%" then
@@ -536,12 +532,12 @@ local function classMatchGenerator(class, plain)
 			end
 			ignore = false
 		end
-		
+
 		firstletter = false
 	end
-	
+
 	table.sort(codes)
-	
+
 	local function inRanges(charCode)
 		for _,r in ipairs(ranges) do
 			if r[1] <= charCode and charCode <= r[2] then
@@ -550,9 +546,9 @@ local function classMatchGenerator(class, plain)
 		end
 		return false
 	end
-	if not unmatch then 
+	if not unmatch then
 		return function(charCode)
-			return binsearch(codes, charCode) or inRanges(charCode) 
+			return binsearch(codes, charCode) or inRanges(charCode)
 		end, skip
 	else
 		return function(charCode)
@@ -561,14 +557,15 @@ local function classMatchGenerator(class, plain)
 	end
 end
 
--- utf8sub with extra argument, and extra result value 
+--[[
+-- utf8sub with extra argument, and extra result value
 local function utf8subWithBytes (s, i, j, sb)
 	-- argument defaults
 	j = j or -1
 
 	local pos = sb or 1
 	local bytes = len(s)
-	local len = 0
+	local length = 0
 
 	-- only set l if i or j is negative
 	local l = (i >= 0 and j >= 0) or utf8len(s)
@@ -582,27 +579,28 @@ local function utf8subWithBytes (s, i, j, sb)
 
 	-- byte offsets to pass to string.sub
 	local startByte,endByte = 1,bytes
-	
-	while pos <= bytes do
-		len = len + 1
 
-		if len == startChar then
+	while pos <= bytes do
+		length = length + 1
+
+		if length == startChar then
 			startByte = pos
 		end
 
 		pos = pos + utf8charbytes(s, pos)
 
-		if len == endChar then
+		if length == endChar then
 			endByte = pos - 1
 			break
 		end
 	end
-	
-	if startChar > len then startByte = bytes+1   end
-	if endChar   < 1   then endByte   = 0         end
-	
+
+	if startChar > length then startByte = bytes+1   end
+	if endChar   < 1      then endByte   = 0         end
+
 	return sub(s, startByte, endByte), endByte + 1
 end
+]]
 
 local cache = setmetatable({},{
 	__mode = 'kv'
@@ -621,7 +619,7 @@ local function matcherGenerator(regex, plain)
 		cachePlain[regex] = matcher
 	end
 	local function simple(func)
-		return function(cC) 
+		return function(cC)
 			if func(cC) then
 				matcher:nextFunc()
 				matcher:nextStr()
@@ -657,14 +655,14 @@ local function matcherGenerator(regex, plain)
 			matcher:nextFunc()
 		end
 	end
-	
+
 	local function capture(id)
-		return function(cC)
+		return function(_)
 			local l = matcher.captures[id][2] - matcher.captures[id][1]
 			local captured = utf8sub(matcher.string, matcher.captures[id][1], matcher.captures[id][2])
 			local check = utf8sub(matcher.string, matcher.str, matcher.str + l)
 			if captured == check then
-				for i = 0, l do
+				for _ = 0, l do
 					matcher:nextStr()
 				end
 				matcher:nextFunc()
@@ -674,18 +672,18 @@ local function matcherGenerator(regex, plain)
 		end
 	end
 	local function captureStart(id)
-		return function(cC)
+		return function(_)
 			matcher.captures[id][1] = matcher.str
 			matcher:nextFunc()
 		end
 	end
 	local function captureStop(id)
-		return function(cC)
+		return function(_)
 			matcher.captures[id][2] = matcher.str - 1
 			matcher:nextFunc()
 		end
 	end
-	
+
 	local function balancer(str)
 		local sum = 0
 		local bc, ec = utf8sub(str, 1, 1), utf8sub(str, 2, 2)
@@ -711,8 +709,8 @@ local function matcherGenerator(regex, plain)
 			end
 		end, skip
 	end
-	
-	matcher.functions[1] = function(cC)
+
+	matcher.functions[1] = function(_)
 		matcher:fullResetOnNextStr()
 		matcher.seqStart = matcher.str
 		matcher:nextFunc()
@@ -721,7 +719,7 @@ local function matcherGenerator(regex, plain)
 			matcher.seqStart = nil
 		end
 	end
-	
+
 	local lastFunc
 	local ignore = false
 	local skip = nil
@@ -844,9 +842,7 @@ local function matcherGenerator(regex, plain)
 	if lastFunc then
 		table.insert(matcher.functions, simple(lastFunc))
 	end
-	lastFunc = nil
-	ignore = nil
-	
+
 	table.insert(matcher.functions, function()
 		if matcher.toEnd and matcher.str ~= matcher.stringLen then
 			matcher:reset()
@@ -854,7 +850,7 @@ local function matcherGenerator(regex, plain)
 			matcher.stop = true
 		end
 	end)
-	
+
 	matcher.nextFunc = function(self)
 		self.func = self.func + 1
 	end
@@ -889,9 +885,9 @@ local function matcherGenerator(regex, plain)
 			s.reset = oldReset
 		end
 	end
-	
+
 	matcher.process = function(self, str, start)
-		
+
 		self.func = 1
 		start = start or 1
 		self.startStr = (start >= 0) and start or utf8len(str) + start + 1
@@ -900,33 +896,33 @@ local function matcherGenerator(regex, plain)
 		self.stringLen = utf8len(str) + 1
 		self.string = str
 		self.stop = false
-		
+
 		self.reset = function(s)
 			s.func = 1
 		end
 
-		local lastPos = self.str
-		local lastByte
-		local char
+		-- local lastPos = self.str
+		-- local lastByte
+		local ch
 		while not self.stop do
 			if self.str < self.stringLen then
 				--[[ if lastPos < self.str then
 					print('last byte', lastByte)
-					char, lastByte = utf8subWithBytes(str, 1, self.str - lastPos - 1, lastByte)
-					char, lastByte = utf8subWithBytes(str, 1, 1, lastByte)
+					ch, lastByte = utf8subWithBytes(str, 1, self.str - lastPos - 1, lastByte)
+					ch, lastByte = utf8subWithBytes(str, 1, 1, lastByte)
 					lastByte = lastByte - 1
 				else
-					char, lastByte = utf8subWithBytes(str, self.str, self.str)
+					ch, lastByte = utf8subWithBytes(str, self.str, self.str)
 				end
 				lastPos = self.str ]]
-				char = utf8sub(str, self.str,self.str)
-				--print('char', char, utf8unicode(char))
-				self.functions[self.func](utf8unicode(char))
+				ch = utf8sub(str, self.str,self.str)
+				--print('char', ch, utf8unicode(ch))
+				self.functions[self.func](utf8unicode(ch))
 			else
 				self.functions[self.func](-1)
 			end
 		end
-		
+
 		if self.seqStart then
 			local captures = {}
 			for _,pair in pairs(self.captures) do
@@ -939,7 +935,7 @@ local function matcherGenerator(regex, plain)
 			return self.seqStart, self.str - 1, unpack(captures)
 		end
 	end
-	
+
 	return matcher
 end
 
@@ -963,7 +959,7 @@ end
 
 -- string.gmatch
 local function utf8gmatch(str, regex, all)
-	regex = (utf8sub(regex,1,1) ~= '^') and regex or '%' .. regex 
+	regex = (utf8sub(regex,1,1) ~= '^') and regex or '%' .. regex
 	local lastChar = 1
 	return function()
 		local found = {utf8find(str, regex, lastChar)}
@@ -981,7 +977,7 @@ local function replace(repl, args)
 	local ret = ''
 	if type(repl) == 'string' then
 		local ignore = false
-		local num = 0
+		local num
 		for c in utf8gensub(repl) do
 			if not ignore then
 				if c == '%' then
@@ -1023,13 +1019,13 @@ local function utf8gsub(str, regex, repl, limit)
 		ret = ret .. utf8sub(str, prevEnd, found[1] - 1)
 		.. replace(repl, args)
 		prevEnd = found[2] + 1
-		n = n + 1 
+		n = n + 1
 		found = {it()}
 	end
-	return ret .. utf8sub(str, prevEnd), n 
+	return ret .. utf8sub(str, prevEnd), n
 end
 
-local utf8 = {}                                                                                             
+local utf8 = {}
 utf8.len = utf8len
 utf8.sub = utf8sub
 utf8.reverse = utf8reverse
@@ -1040,10 +1036,10 @@ utf8.byte = utf8unicode
 utf8.find    = utf8find
 utf8.match   = utf8match
 utf8.gmatch  = utf8gmatch
-utf8.gsub    = utf8gsub  
-utf8.dump    = dump  
-utf8.format = format 
-utf8.lower = lower      
-utf8.upper = upper      
+utf8.gsub    = utf8gsub
+utf8.dump    = dump
+utf8.format = format
+utf8.lower = lower
+utf8.upper = upper
 utf8.rep     = rep
 return utf8
