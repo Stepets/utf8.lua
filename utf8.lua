@@ -93,7 +93,7 @@ local function utf8charbytes (s, i)
 
 	-- determine bytes needed for character, based on RFC 3629
 	-- validate byte 1
-	if c > 0 and c <= 127 then
+	if c >= 0 and c <= 127 then
 		-- UTF8-1
 		return 1
 
@@ -1025,6 +1025,9 @@ local function utf8gsub(str, regex, repl, limit)
 	return ret .. utf8sub(str, prevEnd), n
 end
 
+-- local str = "пыщпыщ ололоо я водитель энло"
+-- print(utf8find(str, "(.л.+)н"))
+
 local utf8 = {}
 utf8.len = utf8len
 utf8.sub = utf8sub
@@ -1042,4 +1045,8 @@ utf8.format = format
 utf8.lower = lower
 utf8.upper = upper
 utf8.rep     = rep
+utf8.raw = {}
+for k,v in pairs(string) do
+  utf8.raw[k] = v
+end
 return utf8
