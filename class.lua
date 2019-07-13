@@ -1,8 +1,8 @@
 local class = {}
 local mt = {__index = class}
 
-local utf8gensub = require ".utf8".gensub
-local utf8unicode = require ".utf8".unicode
+local utf8gensub = require "base".gensub
+local utf8unicode = require "base".unicode
 
 function class.new()
   return setmetatable({}, mt)
@@ -88,12 +88,10 @@ function class.do_parse(class, plain)
 	local firstletter = true
 	local unmatch = false
 
-	local it = utf8gensub(class)
-
 	local skip
-	for c, _, be in it do
+	for nbs, c in utf8gensub(class) do
     debug('cl:parse', c, ignore, plain)
-		skip = be
+		skip = nbs - 1
 		if not ignore and not plain then
 			if c == "%" then
 				ignore = true

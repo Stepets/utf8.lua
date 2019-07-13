@@ -45,35 +45,38 @@ local function assert_equals(a,b)
   )
 end
 
+res = {}
+for _, w in ("123456789"):gensub(2), {1} do res[#res + 1] = w end
+assert_equals({"23", "56", "89"}, res)
+
+assert(("фыва"):validate())
+assert_equals(false, ("ф\xffыва"):validate())
+assert_equals(1, #({("ф\xffыва"):validate()})[2])
+assert_equals({ pos = #"ф" + 1, part = 1, code = 0xFF }, ({("ф\xffыва"):validate()})[2][1])
+
 assert_equals(nil, ("aabb"):find("%bcd"))
 assert_equals({1, 4}, {("aabb"):find("%bab")})
 assert_equals({1, 2}, {("aba"):find('%bab')})
 
 res = {}
-for w in ("aacaabbcabbacbaacab"):gmatch('%bab') do
-  res[#res + 1] = w
-end
+for w in ("aacaabbcabbacbaacab"):gmatch('%bab') do res[#res + 1] = w end
 assert_equals({"acaabbcabb", "acb", "ab"}, res)
 
 assert_equals({1, 0}, {("aacaabbcabbacbaacab"):find('%f[acb]')})
 assert_equals("a", ("aba"):match('%f[ab].'))
 
 res = {}
-for w in ("aacaabbcabbacbaacab"):gmatch('%f[ab]') do
-  res[#res + 1] = w
-end
+for w in ("aacaabbcabbacbaacab"):gmatch('%f[ab]') do res[#res + 1] = w end
 assert_equals({"", "", "", "", ""}, res)
 
+assert_equals({"HaacHaabbcHabbacHbaacHab",	5}, {("aacaabbcabbacbaacab"):gsub('%f[ab]', 'H')})
+
 res = {}
-for w in ("Привет, мир, от Lua"):gmatch("[^%p%d%s%c]+") do
-  res[#res + 1] = w
-end
+for w in ("Привет, мир, от Lua"):gmatch("[^%p%d%s%c]+") do res[#res + 1] = w end
 assert_equals({"Привет", "мир", "от", "Lua"}, res)
 
 res = {}
-for k, v in ("从=世界, 到=Lua"):gmatch("([^%p%s%c]+)=([^%p%s%c]+)") do
-  res[k] = v
-end
+for k, v in ("从=世界, 到=Lua"):gmatch("([^%p%s%c]+)=([^%p%s%c]+)") do res[k] = v end
 assert_equals({["到"] =	"Lua", ["从"] = "世界"}, res)
 
 assert_equals("Ahoj Ahoj světe světe", ("Ahoj světe"):gsub("([^%p%s%c]+)", "%1 %1"))

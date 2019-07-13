@@ -1,8 +1,9 @@
-local utf8 = require ".utf8"
+local utf8 = require "base"
 local cl = require "class"
 local utf8unicode = utf8.byte
 local utf8sub = utf8.sub
 local utf8gensub = utf8.gensub
+local next = utf8.next
 local sub = string.sub
 local find = string.find
 local len = string.len
@@ -224,24 +225,6 @@ local ends = {
   end,
 }
 
-local function symbol_len(byte)
-  return (byte <= 0x7F and 1) or (byte <= 0xDF and 2) or (byte <= 0xEF and 3) or (byte <= 0xF7 and 4)
-end
-
-local function next(str, bs)
-  return bs + symbol_len(byte(str, bs))
-end
-
-local function symbol_iterator(str)
-  local max_len = #str
-  return function(skip_ptr, bs)
-    bs = bs + skip_ptr[1]
-    if bs > max_len then return nil end
-
-    return next(str, bs), bs
-  end
-end
-
 local function matcherGenerator(regex, plain)
 
   local matcher = {
@@ -251,9 +234,7 @@ local function matcherGenerator(regex, plain)
   }
 
   if plain then
-    local skip = {0}
-    for nbs, bs in symbol_iterator(regex), skip, 1 do
-      local c = string.sub(regex, bs, nbs-1)
+    for nbs, c, bs in utf8.gensub(regex) do
       table.insert(matcher.functions, matchers.simple(cl.parse(c, plain), tostring(bs)))
     end
 
@@ -264,10 +245,9 @@ local function matcherGenerator(regex, plain)
   local class = nil
   local ignore = false
   local skip = {0}
-  for nbs, bs in symbol_iterator(regex), skip, 1 do
+  for nbs, c, bs in utf8.gensub(regex), skip do
     skip[1] = 0
-    local c = sub(regex, bs, nbs-1)
-    debug('matcher:matcherGenerator', bs, nbs, c, skip)
+    debug('matcher:matcherGenerator', bs, nbs, c, skip[1])
     if ignore then
       if find('123456789', c, 1, true) then
         if class then
@@ -430,8 +410,8 @@ local function get_matcher_source(regex, plain)
   return function(str, init)
       local ctx = require("context").new({str = str, pos = init or 1})
       local cl = require("class")
-      local utf8sub = require(".utf8").sub
-      local utf8len = require(".utf8").len
+      local utf8sub = require("base").sub
+      local utf8len = require("base").len
       local function add(fun)
           ctx.functions[#ctx.functions + 1] = fun
       end

@@ -1,11 +1,10 @@
-local utf8 = require ".utf8"
+local utf8 = require "base"
 local utf8sub = utf8.sub
 local utf8gensub = utf8.gensub
-local get_matcher_function, get_matcher_source = (require 'matcher').get_matcher_function, (require 'matcher').get_matcher_source
+local get_matcher_function = (require 'matcher').get_matcher_function
 
 debug = print or function() end
 
--- string.find
 local function utf8find(str, regex, init, plain)
   local func = get_matcher_function(regex, plain)
   init = ((init or 1) < 0) and (utf8.len(str) + init + 1) or init
@@ -19,7 +18,6 @@ local function utf8find(str, regex, init, plain)
   return result.start, result.finish, table.unpack(captures)
 end
 
--- string.match
 local function utf8match(str, regex, init)
   local func = get_matcher_function(regex, plain)
   local ctx, result, captures = func(str, init)
@@ -34,7 +32,6 @@ local function utf8match(str, regex, init)
   return utf8sub(str, result.start, result.finish)
 end
 
--- string.gmatch
 local function utf8gmatch(str, regex)
 	regex = (utf8sub(regex,1,1) ~= '^') and regex or '%' .. regex
   local func = get_matcher_function(regex, plain)
@@ -64,7 +61,7 @@ local function replace(repl, args)
 	if type(repl) == 'string' then
 		local ignore = false
 		local num
-		for c in utf8gensub(repl) do
+		for _, c in utf8gensub(repl) do
 			if not ignore then
 				if c == '%' then
 					ignore = true
@@ -92,7 +89,7 @@ local function replace(repl, args)
 	end
 	return ret
 end
--- string.gsub
+
 local function utf8gsub(str, regex, repl, limit)
 	limit = limit or -1
 	local subbed = ''
@@ -126,25 +123,10 @@ local function utf8gsub(str, regex, repl, limit)
 	return subbed .. utf8sub(str, prev_sub_finish), n
 end
 
-local res = {}
-res.len = utf8.len
-res.sub = utf8.sub
-res.reverse = utf8.reverse
-res.char = utf8.char
-res.unicode = utf8.unicode
-res.gensub = utf8.gensub
-res.byte = utf8.unicode
-res.find    = utf8find
-res.match   = utf8match
-res.gmatch  = utf8gmatch
-res.gsub    = utf8gsub
-res.dump    = string.dump
-res.format = string.format
-res.lower = string.lower
-res.upper = string.upper
-res.rep     = string.rep
-res.raw = {}
-for k,v in pairs(string) do
-  res.raw[k] = v
-end
-return res
+-- attaching high-level functions
+utf8.find    = utf8find
+utf8.match   = utf8match
+utf8.gmatch  = utf8gmatch
+utf8.gsub    = utf8gsub
+
+return utf8

@@ -1,8 +1,8 @@
   return function(str, init)
       local ctx = require("context").new({str = str, pos = init or 1})
       local cl = require("class")
-      local utf8sub = require(".utf8").sub
-      local utf8len = require(".utf8").len
+      local utf8sub = require("base").sub
+      local utf8len = require("base").len
       local function add(fun)
           ctx.functions[#ctx.functions + 1] = fun
       end
