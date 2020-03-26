@@ -1,4 +1,4 @@
-local utf8 = require "base"
+local utf8 = require "utf8primitives"
 local utf8unicode = utf8.byte
 local utf8sub = utf8.sub
 local utf8len = utf8.len

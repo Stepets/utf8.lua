@@ -75,9 +75,10 @@ local rep     = string.rep
 local sub     = string.sub
 local upper   = string.upper
 
+debug = print or function() end
 
 local function utf8symbollen(byte)
-  return not byte and 0 or (byte <= 0x7F and 1) or (byte <= 0xDF and 2) or (byte <= 0xEF and 3) or (byte <= 0xF7 and 4) or 1
+    return not byte and 0 or (byte < 0x80 and 1) or (byte >= 0xF0 and 4) or (byte >= 0xE0 and 3) or (byte >= 0xC0 and 2) or 1
 end
 
 local function utf8charbytes(str, bs)
@@ -237,8 +238,8 @@ local function utf8gensub(str, sub_len)
     bs = (bs and bs or 1) + (skip_ptr and (skip_ptr[1] or 0) or 0)
 
 		nbs = bs
+    if bs > max_len then return nil end
 		for i = 1, sub_len do
-	    if bs > max_len then return nil end
 			nbs = utf8next(str, nbs)
 		end
 

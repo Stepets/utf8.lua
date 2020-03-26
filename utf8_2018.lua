@@ -1,9 +1,23 @@
-local utf8 = require "base"
+local utf8 = require "utf8primitives"
 local utf8sub = utf8.sub
 local utf8gensub = utf8.gensub
-local get_matcher_function = (require 'matcher').get_matcher_function
+local get_matcher_function = require 'regex_parser'--(require 'matcher').get_matcher_function
 
 debug = print or function() end
+
+function dump(tab, val)
+  tab = tab or ''
+
+  if type(val) == 'table' then
+    for k,v in pairs(val) do
+      print(tab .. tostring(k))
+      dump(tab .. '\t', v)
+    end
+  else
+    print(tab .. tostring(val))
+  end
+end
+
 
 local function utf8find(str, regex, init, plain)
   local func = get_matcher_function(regex, plain)

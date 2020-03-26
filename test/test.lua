@@ -5,54 +5,21 @@ end
 
 local res = {}
 
-local function equals(t1, t2)
-  for k,v in pairs(t1) do
-    if not t2[k] or t2[k] ~= v then return false end
-  end
-  for k,v in pairs(t2) do
-    if not t1[k] or t1[k] ~= v then return false end
-  end
-  return true
-end
-
-local old_assert = assert
-local assert = function(cond, ...)
-  if not cond then
-    local data = {...}
-    local msg = ""
-    for _, v in pairs(data) do
-      local type = type(v)
-      if type == 'table' then
-        local tbl = "{"
-        for k,v in pairs(v) do
-          tbl = tbl .. tostring(k) .. ' = ' .. tostring(v) .. ', '
-        end
-        msg = msg .. tbl .. '}'
-      else
-        msg = msg .. tostring(v)
-      end
-    end
-    error(#data > 0 and msg or "assertion failed!")
-  end
-  return cond
-end
-
-local function assert_equals(a,b)
-  assert(
-    type(a) == 'table' and type(b) == 'table' and equals(a,b) or a == b,
-    "expected: ", a and a or tostring(a), "\n",
-    "got: ", b and b or tostring(b)
-  )
-end
+local equals = require 'test.util'.equals
+local assert = require 'test.util'.assert
+local assert_equals = require 'test.util'.assert_equals
 
 res = {}
 for _, w in ("123456789"):gensub(2), {1} do res[#res + 1] = w end
 assert_equals({"23", "56", "89"}, res)
 
+assert_equals(0, ("фыва"):next(0))
+assert_equals(100, ("фыва"):next(100))
+assert_equals(#"ф" + 1, ("фыва"):next(1))
+assert_equals("ыва", utf8.raw.sub("фыва", ("фыва"):next(1)))
+
 assert(("фыва"):validate())
-assert_equals(false, ("ф\xffыва"):validate())
-assert_equals(1, #({("ф\xffыва"):validate()})[2])
-assert_equals({ pos = #"ф" + 1, part = 1, code = 0xFF }, ({("ф\xffыва"):validate()})[2][1])
+assert_equals({false, {{ pos = #"ф" + 1, part = 1, code = 0xFF }} }, {("ф\xffыва"):validate()})
 
 assert_equals(nil, ("aabb"):find("%bcd"))
 assert_equals({1, 4}, {("aabb"):find("%bab")})
@@ -91,7 +58,9 @@ assert_equals({"пыщпыщ о보라보라 я водитель эн보라",	3},
 
 assert_equals("пыщпыщ ололоо я", ("пыщпыщ ололоо я водитель энло"):match("^п[лопыщ ]*я"))
 
-assert_equals(nil, ('abc abc'):match('([^%s]+)%s%s'))
+assert_equals("в", ("пыщпыщ ололоо я водитель энло"):match("[в-д]+"))
+
+assert_equals(nil, ('abc abc'):match('([^%s]+)%s%s')) -- https://github.com/Stepets/utf8.lua/issues/2
 
 res = {}
 for w in ("aacabbacbbcaabbcbacaa"):gmatch("a+b") do res[#res + 1] = w end
@@ -123,3 +92,6 @@ assert_equals({"bbacbbcaabbcb", "b"}, {("aacabbacbbcaabbcbacaa"):match("((ba*).*
 res = {}
 for w in ("aacabbacbbcaabbcbacaa"):gmatch("((b+a*).-%2)") do res[#res + 1] = w end
 assert_equals({"bbacbb", "bb"}, res)
+
+assert_equals("a**", ("a**v"):match("a**+"))
+assert_equals("a", ("a**v"):match("a**-"))
