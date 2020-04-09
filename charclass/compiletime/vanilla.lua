@@ -1,12 +1,8 @@
-local base = require "utf8primitives"
-local cl = require "charclass.compiletime.builder"
+return function(utf8)
 
-local function next(str, bs)
-  local nbs1 = base.next(str, bs)
-  local nbs2 = base.next(str, nbs1)
-  -- print("str:", tostring(base.raw.sub(str, nbs1, nbs2 - 1)), "bss", bs, nbs1, nbs2)
-  return base.raw.sub(str, nbs1, nbs2 - 1), nbs1
-end
+local cl = utf8:require "charclass.compiletime.builder"
+
+local next = utf8.util.next
 
 local token = 1
 
@@ -16,11 +12,11 @@ local function parse(str, c, bs, ctx)
 
   local class
   local nbs = bs
-  print("vp", tttt, str, c, nbs, next(str, nbs))
+  utf8.debug("cc_parse", tttt, str, c, nbs, next(str, nbs))
 
   if c == '%' then
     c, nbs = next(str, bs)
-    local _c = base.raw.lower(c)
+    local _c = utf8.raw.lower(c)
     local matched
     if _c == 'a' then
       matched = ('alpha')
@@ -59,50 +55,33 @@ local function parse(str, c, bs, ctx)
     while true do
       local prev_nbs = nbs
       c, nbs = next(str, nbs)
-      print("next", tttt, c, nbs)
+      utf8.debug("next", tttt, c, nbs)
       if c == '^' and firstletter then
         class:invert()
       elseif c == ']' then
-        print('] on pos', tttt, nbs)
+        utf8.debug('] on pos', tttt, nbs)
         break
       elseif c == '' then
         error "malformed pattern (missing ']')"
       else
-        local sub_class, skip = ctx.parse(str, c, nbs, ctx)
+        local sub_class, skip = utf8.regex.compiletime.charclass.parse(str, c, nbs, ctx)
         nbs = prev_nbs + skip
-        if sub_class then
-          print("include", tttt, bs, prev_nbs, nbs, skip)
-          class:include(sub_class)
-        else
-          error("cannot be")
-        --   -- todo separate ranges parser
-        --   local c0 = c
-        --   local c1, nbs1 = next(str, nbs)
-        --   print(">>>>range", c0, c1)
-        --   if c1 == '-' then
-        --     c, nbs = next(str, nbs1)
-        --     if c then
-        --       class:with_ranges({c1, c})
-        --     else
-        --       class:with_codes(c0, '-')
-        --     end
-        --   else
-        --     class:with_codes(c0)
-        --   end
-        end
+        utf8.debug("include", tttt, bs, prev_nbs, nbs, skip)
+        class:include(sub_class)
       end
       firstletter = false
     end
     ctx.internal = old_internal
-    --nbs = base.next(str, nbs)
   elseif c == '.' then
     class = cl.new():invert()
   end
 
-  return class, base.next(str, nbs) - bs
+  return class, utf8.next(str, nbs) - bs
 end
 
 return parse
+
+end
 
 --[[
     x: (where x is not one of the magic characters ^$()%.[]*+-?) represents the character x itself.

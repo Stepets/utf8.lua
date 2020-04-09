@@ -1,10 +1,10 @@
---local require = require; do local _p = (... or "."):match("(.-)[^%.]+$"); local r = require require = function(p) return r(_p .. p) or r(p) end; end
+return function(utf8)
 
 local class = {}
 local mt = {__index = class}
 
-local utf8gensub = require "utf8primitives".gensub
-local utf8unicode = require "utf8primitives".unicode
+local utf8gensub = utf8.gensub
+local utf8unicode = utf8.unicode
 
 function class.new()
   return setmetatable({}, mt)
@@ -139,16 +139,16 @@ end
 
 function class:test(char_code)
   local result = self:do_test(char_code)
-  debug('class:test', result, "'" .. (char_code and utf8.char(char_code) or 'nil') .. "'", char_code)
+  utf8.debug('class:test', result, "'" .. (char_code and utf8.char(char_code) or 'nil') .. "'", char_code)
   return result
 end
 
 function class:do_test(char_code)
   if not char_code then return false end
   local found = (self:in_codes(char_code) or self:in_ranges(char_code) or self:in_classes(char_code) or self:in_subs(char_code)) and not self:in_not_classes(char_code)
-  debug('class:do_test', 'found', found, not found, 'inverted', self.inverted, 'result', self.inverted and not found or found)
-  -- debug(self:in_codes(char_code), self:in_ranges(char_code), self:in_classes(char_code), self:in_subs(char_code), not self:in_not_classes(char_code))
-  -- ternary if ideom (self.inverted and not found or found) doesn't work with booleans
+  utf8.debug('class:do_test', 'found', found, not found, 'inverted', self.inverted, 'result', self.inverted and not found or found)
+  utf8.debug(self:in_codes(char_code), self:in_ranges(char_code), self:in_classes(char_code), self:in_subs(char_code), not self:in_not_classes(char_code))
+  -- ternary if ideom (self.inverted and not found or found) doesn't work with booleans >_<
   if self.inverted then
     return not found
   else
@@ -157,3 +157,5 @@ function class:do_test(char_code)
 end
 
 return class
+
+end

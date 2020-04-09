@@ -63,6 +63,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --               %xF4 %x80-8F 2( UTF8-tail )
 -- UTF8-tail   = %x80-BF
 --
+return function(utf8)
 
 local byte    = string.byte
 local char    = string.char
@@ -74,8 +75,6 @@ local lower   = string.lower
 local rep     = string.rep
 local sub     = string.sub
 local upper   = string.upper
-
-debug = print or function() end
 
 local function utf8symbollen(byte)
     return not byte and 0 or (byte < 0x80 and 1) or (byte >= 0xF0 and 4) or (byte >= 0xE0 and 3) or (byte >= 0xC0 and 2) or 1
@@ -263,8 +262,6 @@ local function utf8validator(str, bs)
 		error("bad argument #2 to 'utf8charbytes' (number expected, got ".. type(bs).. ")")
 	end
 
-	debug(str, bs)
-
 	local c = byte(str, bs)
 	if not c then return end
 
@@ -349,25 +346,24 @@ local function utf8validate(str, byte_pos)
 	return #result == 0, result
 end
 
-local base = {}
-base.len = utf8len
-base.sub = utf8sub
-base.reverse = utf8reverse
-base.char = utf8char
-base.unicode = utf8unicode
-base.byte = utf8unicode
-base.next = utf8next
-
-base.gensub = utf8gensub
-base.validate = utf8validate
-
-base.dump    = dump
-base.format = format
-base.lower = lower
-base.upper = upper
-base.rep     = rep
-base.raw = {}
+utf8.len      = utf8len
+utf8.sub      = utf8sub
+utf8.reverse  = utf8reverse
+utf8.char     = utf8char
+utf8.unicode  = utf8unicode
+utf8.byte     = utf8unicode
+utf8.next     = utf8next
+utf8.gensub   = utf8gensub
+utf8.validate = utf8validate
+utf8.dump     = dump
+utf8.format   = format
+utf8.lower    = lower
+utf8.upper    = upper
+utf8.rep      = rep
+utf8.raw = {}
 for k,v in pairs(string) do
-  base.raw[k] = v
+  utf8.raw[k] = v
 end
-return base
+return utf8
+
+end

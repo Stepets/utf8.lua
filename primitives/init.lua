@@ -1,6 +1,6 @@
 return function(utf8)
 
-local provided = utf8.config.runtime_charclasses
+local provided = utf8.config.primitives
 
 if provided then
   if type(provided) == "table" then
@@ -12,11 +12,6 @@ if provided then
   end
 end
 
-local ffi = pcall(require, "ffi")
-if not ffi then
-  return utf8:require "charclass.runtime.dummy"
-else
-  return utf8:require "charclass.runtime.native"
-end
+return utf8:require("primitives.dummy")
 
 end

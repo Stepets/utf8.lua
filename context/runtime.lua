@@ -1,10 +1,11 @@
-local utf8 = require "utf8primitives"
+return function(utf8)
+
 local utf8unicode = utf8.byte
 local utf8sub = utf8.sub
 local utf8len = utf8.len
 local rawgsub = utf8.raw.gsub
 
-local util = require "util"
+local util = utf8.util
 
 local ctx = {}
 local mt = {
@@ -59,13 +60,15 @@ function ctx:get_function()
 end
 
 function ctx:done()
-  debug('done', self)
+  utf8.debug('done', self)
   coroutine.yield(self, self.result, self.captures)
 end
 
 function ctx:terminate()
-  debug('terminate', self)
+  utf8.debug('terminate', self)
   coroutine.yield(nil)
 end
 
 return ctx
+
+end

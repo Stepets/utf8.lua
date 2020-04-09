@@ -1,5 +1,6 @@
-local base = require "utf8primitives"
-local matchers = require("modifier.compiletime.simple")
+return function(utf8)
+
+local matchers = utf8:require("modifier.compiletime.simple")
 
 local function parse(regex, c, bs, ctx)
   local functions
@@ -23,3 +24,5 @@ return {
   parse = parse,
   check = check,
 }
+
+end

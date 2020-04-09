@@ -1,8 +1,12 @@
-local byte = require "utf8primitives".byte
-local unpack = unpack or table.unpack
+return function(utf8)
+
+local byte = utf8.byte
+local unpack = utf8.config.unpack
 
 local builder = {}
 local mt = {__index = builder}
+
+utf8.regex.compiletime.charclass.builder = builder
 
 function builder.new()
   return setmetatable({}, mt)
@@ -116,3 +120,5 @@ function builder:build()
 end
 
 return builder
+
+end

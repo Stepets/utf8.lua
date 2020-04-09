@@ -1,89 +1,65 @@
-local base = require("utf8primitives")
-local gensub = base.gensub
-local sub = base.sub
+return function(utf8)
 
-local modifiers = {
-  require "modifier.compiletime.vanilla",
-  require "modifier.compiletime.frontier",
-  require "modifier.compiletime.stub",
-}
+utf8:require "modifier.compiletime.parser"
+utf8:require "charclass.compiletime.parser"
+utf8:require "begins.compiletime.parser"
+utf8:require "ends.compiletime.parser"
 
-local begins = {
-  require "begins.compiletime.vanilla"
-}
+local gensub = utf8.gensub
+local sub = utf8.sub
 
-local ends = {
-  require "ends.compiletime.vanilla"
-}
+local parser_context = utf8:require "context.compiletime"
 
 return function(regex, plain)
-  print("regex", regex)
-  local ctx = require 'parser_context':new()
+  utf8.debug("regex", regex)
+  local ctx = parser_context:new()
 
   local skip = {0}
   for nbs, c, bs in gensub(regex, 0), skip do
     repeat -- continue
       skip[1] = 0
-      -- c = base.raw.sub(regex, bs, bs)
 
-      -- print("str:", tostring(base.raw.sub(str, nbs1, nbs2 - 1)), "bss", bs, nbs1, nbs2)
-      c = base.raw.sub(regex, bs, base.next(regex, bs) - 1)
+      c = utf8.raw.sub(regex, bs, utf8.next(regex, bs) - 1)
 
-      for _, m in ipairs(begins) do
-        local functions, move = m.parse(regex, c, bs, ctx)
-        print("begins", _, c, bs, nbs, move, functions)
-        if functions then
-          skip[1] = move
-          ctx.begins = functions
-          break
-        end
-      end
-      if skip[1] ~= 0 then break end
-
-      for _, m in ipairs(ends) do
-        local functions, move = m.parse(regex, c, bs, ctx)
-        print("ends", _, c, bs, nbs, move, functions)
-        if functions then
-          skip[1] = move
-          ctx.ends = functions
-          break
-        end
-      end
-      if skip[1] ~= 0 then break end
-
-      for _, m in ipairs(modifiers) do
-        local functions, move = m.parse(regex, c, bs, ctx)
-        print("mod", _, c, bs, nbs, move, functions and table.unpack(functions))
-        if functions then
-          ctx.prev_class = nil
-          mod_found = true
-          skip[1] = move
-          print(skip[1])
-          for _, f in ipairs(functions) do
-            ctx.funcs[#ctx.funcs + 1] = f
-          end
-          break
-        end
-      end
-      if skip[1] ~= 0 then break end
-
-      local charclass, move = ctx.parse(regex, c, bs, ctx)
-      if charclass then
+      local functions, move = utf8.regex.compiletime.begins.parse(regex, c, bs, ctx)
+      if functions then
+        ctx.begins = functions
         skip[1] = move
       end
+      if skip[1] ~= 0 then break end
+
+      local functions, move = utf8.regex.compiletime.ends.parse(regex, c, bs, ctx)
+      if functions then
+        ctx.ends = functions
+        skip[1] = move
+      end
+      if skip[1] ~= 0 then break end
+
+      local functions, move = utf8.regex.compiletime.modifier.parse(regex, c, bs, ctx)
+      if functions then
+        for _, f in ipairs(functions) do
+          ctx.funcs[#ctx.funcs + 1] = f
+        end
+        skip[1] = move
+      end
+      if skip[1] ~= 0 then break end
+
+      local charclass, move = utf8.regex.compiletime.charclass.parse(regex, c, bs, ctx)
+      if charclass then skip[1] = move end
     until true -- continue
   end
 
-  for _, m in ipairs(modifiers) do
+  for _, m in ipairs(utf8.config.modifier) do
     if m.check then m.check(ctx) end
   end
 
   local src = [[
-  return function(str, init)
-      local ctx = require("context").new({str = str, pos = init or 1})
-      local cl = require("charclass.runtime")
-      local utf8sub = require("utf8primitives").sub
-      local utf8len = require("utf8primitives").len
+  return function(str, init, utf8)
+      local ctx = utf8:require("context.runtime").new({str = str, pos = init or 1})
+      local cl = utf8:require("charclass.runtime")
+      local utf8sub = utf8.sub
+      local utf8len = utf8.len
+      local debug = utf8.debug
       local function add(fun)
           ctx.functions[#ctx.functions + 1] = fun
       end
@@ -94,7 +70,9 @@ return function(regex, plain)
   end
   ]]
 
-  print(regex, src)
+  utf8.debug(regex, src)
 
-  return assert((loadstring or load)(src, (plain and "plain " or "") .. regex))()
+  return assert(utf8.config.loadstring(src, (plain and "plain " or "") .. regex))()
+end
+
 end

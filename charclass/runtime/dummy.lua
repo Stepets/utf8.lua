@@ -1,5 +1,6 @@
--- local require = require; do local _p = (... or "."):match("(.-)[^%.]+$"); local r = require require = function(p) return r(_p .. p) end; end
-local base = require("charclass.runtime.base")
+return function(utf8)
+
+local base = utf8:require "charclass.runtime.base"
 
 local dummy = setmetatable({}, {__index = base})
 local mt = {__index = dummy}
@@ -36,3 +37,5 @@ function dummy:without_classes(...)
 end
 
 return dummy
+
+end

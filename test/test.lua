@@ -1,6 +1,11 @@
-local utf8 = require '.utf8_2018'
+local utf8 = require('.')
+utf8.config = {
+  debug = utf8:require("util").debug
+}
+utf8:init()
 for k,v in pairs(utf8) do
   string[k] = v
+  print(k,v)
 end
 
 local res = {}
@@ -95,3 +100,5 @@ assert_equals({"bbacbb", "bb"}, res)
 
 assert_equals("a**", ("a**v"):match("a**+"))
 assert_equals("a", ("a**v"):match("a**-"))
+
+print("\ntests passed\n")

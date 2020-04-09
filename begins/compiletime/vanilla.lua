@@ -1,3 +1,5 @@
+return function(utf8)
+
 local matchers = {
   sliding = function()
     return [[
@@ -55,3 +57,5 @@ return {
   parse = parse,
   default = default,
 }
+
+end

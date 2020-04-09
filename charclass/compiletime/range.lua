@@ -1,12 +1,8 @@
-local base = require "utf8primitives"
-local cl = require "charclass.compiletime.builder"
+return function(utf8)
 
-local function next(str, bs)
-  local nbs1 = base.next(str, bs)
-  local nbs2 = base.next(str, nbs1)
-  -- print("str:", tostring(base.raw.sub(str, nbs1, nbs2 - 1)), "bss", bs, nbs1, nbs2)
-  return base.raw.sub(str, nbs1, nbs2 - 1), nbs1
-end
+local cl = utf8.regex.compiletime.charclass.builder
+
+local next = utf8.util.next
 
 return function(str, c, bs, ctx)
   if not ctx.internal then return end
@@ -23,7 +19,7 @@ return function(str, c, bs, ctx)
     r1 = c
   end
 
-  print("range r1", r1, nbs)
+  utf8.debug("range r1", r1, nbs)
 
   c, nbs = next(str, nbs)
   if c ~= '-' then return end
@@ -36,11 +32,13 @@ return function(str, c, bs, ctx)
     r2 = c
   end
 
-  print("range r2", r2, nbs)
+  utf8.debug("range r2", r2, nbs)
 
   if r1 and r2 then
-    return cl.new():with_ranges{base.byte(r1), base.byte(r2)}, base.next(str, nbs) - bs
+    return cl.new():with_ranges{utf8.byte(r1), utf8.byte(r2)}, utf8.next(str, nbs) - bs
   else
     return
   end
+end
+
 end
