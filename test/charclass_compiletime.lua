@@ -1,4 +1,8 @@
-local utf8 = require ".utf8"
+local utf8 = require "init"
+utf8.config = {
+  debug = utf8:require("util").debug
+}
+utf8:init()
 
 local ctx = utf8:require("context.compiletime"):new()
 
@@ -168,3 +172,5 @@ assert_equals({parse("бб[[ц]%a[ы]]ю", "[", #"бб" + 1, ctx)}, {
   {codes = {utf8.byte("ц"), utf8.byte("ы")}, ranges = nil, classes = {'alpha'}, not_classes = nil},
   utf8.raw.len("[[ц]%a[ы]]")
 })
+
+print "OK"

@@ -1,5 +1,16 @@
-local utf8 = require '.utf8'
+local utf8 = require 'init'
+utf8.config = {
+  debug = utf8:require("util").debug
+}
+utf8:init()
 print('testing utf8 library')
+
+local LUA_51, LUA_53 = false, false
+if "\xe4" == "xe4" then -- lua5.1
+  LUA_51 = true
+else -- luajit lua5.3
+  LUA_53 = true
+end
 
 assert(utf8.sub("123456789",2,4) == "234")
 assert(utf8.sub("123456789",7) == "789")
@@ -41,7 +52,11 @@ assert(utf8.len("\0\0\0") == 3)
 assert(utf8.len("1234567890") == 10)
 
 assert(utf8.byte("a") == 97)
-assert(utf8.byte("\xe4") > 127)
+if LUA_51 then
+  assert(utf8.byte("�") > 127)
+else
+  assert(utf8.byte("\xe4") > 127)
+end
 assert(utf8.byte(utf8.char(255)) == 255)
 assert(utf8.byte(utf8.char(0)) == 0)
 assert(utf8.byte("\0") == 0)
@@ -55,15 +70,18 @@ assert(utf8.byte("hi", 3) == nil)
 assert(utf8.byte("hi", 9, 10) == nil)
 assert(utf8.byte("hi", 2, 1) == nil)
 assert(utf8.char() == "")
-assert(utf8.raw.char(0, 255, 0) == "\0\255\0") -- fails due 255 can't be utf8 byte
-assert(utf8.char(0, 255, 0) == "\0\195\191\0")
-assert(utf8.raw.char(0, utf8.byte("\xe4"), 0) == "\0\xe4\0")
-assert(utf8.char(0, utf8.byte("\xe4"), 0) == "\0\195\164\0")
-assert(utf8.raw.char(utf8.raw.byte("\xe4l\0�u", 1, -1)) == "\xe4l\0�u")
-assert(utf8.raw.char(utf8.raw.byte("\xe4l\0�u", 1, -1)) == "\xe4l\0�u")
-assert(utf8.raw.char(utf8.raw.byte("\xe4l\0�u", 1, 0)) == "")
-assert(utf8.raw.char(utf8.raw.byte("\xe4l\0�u", -10, 100)) == "\xe4l\0�u")
+if LUA_53 then
+  assert(utf8.raw.char(0, 255, 0) == "\0\255\0") -- fails due 255 can't be utf8 byte
+  assert(utf8.char(0, 255, 0) == "\0\195\191\0")
+  assert(utf8.raw.char(0, utf8.byte("\xe4"), 0) == "\0\xe4\0")
+  assert(utf8.char(0, utf8.byte("\xe4"), 0) == "\0\195\164\0")
+  assert(utf8.raw.char(utf8.raw.byte("\xe4l\0�u", 1, -1)) == "\xe4l\0�u")
+  assert(utf8.raw.char(utf8.raw.byte("\xe4l\0�u", 1, -1)) == "\xe4l\0�u")
+  assert(utf8.raw.char(utf8.raw.byte("\xe4l\0�u", 1, 0)) == "")
+  assert(utf8.raw.char(utf8.raw.byte("\xe4l\0�u", -10, 100)) == "\xe4l\0�u")
+end
 
+print(utf8.upper("abcdef"), utf8.len("abcdef"))
 assert(utf8.upper("ab\0c") == "AB\0C")
 assert(utf8.lower("\0ABCc%$") == "\0abcc%$")
 assert(utf8.rep('teste', 0) == '')

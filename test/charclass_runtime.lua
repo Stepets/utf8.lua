@@ -1,10 +1,14 @@
-local utf8 = require(".utf8")
+local utf8 = require("init")
+utf8.config = {
+  debug = utf8:require("util").debug
+}
+utf8:init()
 
-local cl = require("charclass.runtime")
+local cl = utf8:require("charclass.runtime.init")
 
-local equals = require 'test.util'.equals
-local assert = require 'test.util'.assert
-local assert_equals = require 'test.util'.assert_equals
+local equals = require('test.util').equals
+local assert = require('test.util').assert
+local assert_equals = require('test.util').assert_equals
 
 assert_equals(true, cl.new()
   :with_codes(utf8.byte' ')
@@ -55,9 +59,21 @@ assert_equals(true, cl.new()
 assert_equals(true, cl.new()
   :with_codes()
   :with_ranges()
-  :with_classes('punct', 'digit', 'space', 'cntrl'    )
+  :with_classes('punct', 'digit', 'space', 'cntrl')
   :without_classes()
   :with_subs()
   :invert()
   :test(utf8.byte'П')
 )
+
+assert_equals(true, cl.new()
+  :with_codes()
+  :with_ranges()
+  :with_classes('punct', 'digit', 'space', 'cntrl')
+  :without_classes()
+  :with_subs()
+  :invert()
+  :test(utf8.byte'и')
+)
+
+print "OK"

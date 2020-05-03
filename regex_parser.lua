@@ -56,7 +56,7 @@ return function(regex, plain)
   local src = [[
   return function(str, init, utf8)
       local ctx = utf8:require("context.runtime").new({str = str, pos = init or 1})
-      local cl = utf8:require("charclass.runtime")
+      local cl = utf8:require("charclass.runtime.init")
       local utf8sub = utf8.sub
       local utf8len = utf8.len
       local debug = utf8.debug

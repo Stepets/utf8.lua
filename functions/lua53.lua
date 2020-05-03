@@ -33,12 +33,12 @@ local function utf8match(str, regex, init)
 end
 
 local function utf8gmatch(str, regex)
-	regex = (utf8sub(regex,1,1) ~= '^') and regex or '%' .. regex
+  regex = (utf8sub(regex,1,1) ~= '^') and regex or '%' .. regex
   local func = get_matcher_function(regex, plain, utf8)
   local ctx, result, captures
   local continue_pos = 1
 
-	return function()
+  return function()
     ctx, result, captures = func(str, continue_pos, utf8)
 
     if not ctx then return nil end
@@ -53,47 +53,47 @@ local function utf8gmatch(str, regex)
     else
       return utf8sub(str, result.start, result.finish)
     end
-	end
+  end
 end
 
 local function replace(repl, args)
-	local ret = ''
-	if type(repl) == 'string' then
-		local ignore = false
-		local num
-		for _, c in utf8gensub(repl) do
-			if not ignore then
-				if c == '%' then
-					ignore = true
-				else
-					ret = ret .. c
-				end
-			else
-				num = tonumber(c)
-				if num then
-					ret = ret .. args[num]
-				else
-					ret = ret .. c
-				end
-				ignore = false
-			end
-		end
-	elseif type(repl) == 'table' then
-		ret = repl[args[1] or args[0]] or ''
-	elseif type(repl) == 'function' then
-		if #args > 0 then
-			ret = repl(unpack(args, 1)) or ''
-		else
-			ret = repl(args[0]) or ''
-		end
-	end
-	return ret
+  local ret = ''
+  if type(repl) == 'string' then
+    local ignore = false
+    local num
+    for _, c in utf8gensub(repl) do
+      if not ignore then
+        if c == '%' then
+          ignore = true
+        else
+          ret = ret .. c
+        end
+      else
+        num = tonumber(c)
+        if num then
+          ret = ret .. args[num]
+        else
+          ret = ret .. c
+        end
+        ignore = false
+      end
+    end
+  elseif type(repl) == 'table' then
+    ret = repl[args[1] or args[0]] or ''
+  elseif type(repl) == 'function' then
+    if #args > 0 then
+      ret = repl(unpack(args, 1)) or ''
+    else
+      ret = repl(args[0]) or ''
+    end
+  end
+  return ret
 end
 
 local function utf8gsub(str, regex, repl, limit)
-	limit = limit or -1
-	local subbed = ''
-	local prev_sub_finish = 1
+  limit = limit or -1
+  local subbed = ''
+  local prev_sub_finish = 1
 
   regex = (utf8sub(regex,1,1) ~= '^') and regex or '%' .. regex
   local func = get_matcher_function(regex, plain, utf8)
@@ -101,7 +101,7 @@ local function utf8gsub(str, regex, repl, limit)
   local continue_pos = 1
 
   local n = 0
-	while limit ~= n do
+  while limit ~= n do
     ctx, result, captures = func(str, continue_pos, utf8)
     if not ctx then break end
 
@@ -120,7 +120,7 @@ local function utf8gsub(str, regex, repl, limit)
 
   end
 
-	return subbed .. utf8sub(str, prev_sub_finish), n
+  return subbed .. utf8sub(str, prev_sub_finish), n
 end
 
 -- attaching high-level functions

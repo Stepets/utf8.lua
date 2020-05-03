@@ -1,11 +1,18 @@
-local utf8 = require('.')
+local utf8 = require('init')
 utf8.config = {
-  debug = utf8:require("util").debug
+  debug = utf8:require("util").debug,
 }
 utf8:init()
 for k,v in pairs(utf8) do
   string[k] = v
   print(k,v)
+end
+
+local LUA_51, LUA_53 = false, false
+if "\xe4" == "xe4" then -- lua5.1
+  LUA_51 = true
+else -- luajit lua5.3
+  LUA_53 = true
 end
 
 local res = {}
@@ -24,7 +31,10 @@ assert_equals(#"ф" + 1, ("фыва"):next(1))
 assert_equals("ыва", utf8.raw.sub("фыва", ("фыва"):next(1)))
 
 assert(("фыва"):validate())
-assert_equals({false, {{ pos = #"ф" + 1, part = 1, code = 0xFF }} }, {("ф\xffыва"):validate()})
+assert_equals({false, {{ pos = #"ф" + 1, part = 1, code = 255 }} }, {("ф\255ыва"):validate()})
+if LUA_53 then
+  assert_equals({false, {{ pos = #"ф" + 1, part = 1, code = 0xFF }} }, {("ф\xffыва"):validate()})
+end
 
 assert_equals(nil, ("aabb"):find("%bcd"))
 assert_equals({1, 4}, {("aabb"):find("%bab")})

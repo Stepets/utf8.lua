@@ -22,24 +22,29 @@ local function dump(val, tab)
   tab = tab or ''
 
   if type(val) == 'table' then
+    utf8.config.logger('{\n')
     for k,v in pairs(val) do
-      utf8.config.logger(tab .. tostring(k))
+      utf8.config.logger(tab .. tostring(k) .. " = ")
       dump(v, tab .. '\t')
+      utf8.config.logger("\n")
     end
+    utf8.config.logger(tab .. '}\n')
   else
-    utf8.config.logger(tab .. tostring(val))
+    utf8.config.logger(tostring(val))
   end
 end
 
 function utf8.util.debug(...)
   local t = {...}
   for _, v in ipairs(t) do
-    if type(v) == "table" then
-      return dump(t)
+    if type(v) == "table" and not (getmetatable(v) or {}).__tostring then
+      dump(v, '\t')
+    else
+      utf8.config.logger(tostring(v), " ")
     end
   end
 
-  return utf8.config.logger(...)
+  utf8.config.logger('\n')
 end
 
 function utf8.debug(...)

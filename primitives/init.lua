@@ -12,6 +12,12 @@ if provided then
   end
 end
 
-return utf8:require("primitives.dummy")
+if false and pcall(require, "tarantool") then -- todo
+  return utf8:require "primitives.tarantool"
+elseif pcall(require, "ffi") then
+  return utf8:require "primitives.native"
+else
+  return utf8:require "primitives.dummy"
+end
 
 end

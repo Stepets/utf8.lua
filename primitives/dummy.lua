@@ -65,305 +65,352 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --
 return function(utf8)
 
-local byte    = string.byte
-local char    = string.char
-local dump    = string.dump
-local find    = string.find
-local format  = string.format
-local len     = string.len
-local lower   = string.lower
-local rep     = string.rep
-local sub     = string.sub
-local upper   = string.upper
+    local byte    = string.byte
+    local char    = string.char
+    local dump    = string.dump
+    local find    = string.find
+    local format  = string.format
+    local len     = string.len
+    local lower   = string.lower
+    local rep     = string.rep
+    local sub     = string.sub
+    local upper   = string.upper
 
-local function utf8symbollen(byte)
-    return not byte and 0 or (byte < 0x80 and 1) or (byte >= 0xF0 and 4) or (byte >= 0xE0 and 3) or (byte >= 0xC0 and 2) or 1
-end
+    local function utf8symbollen(byte)
+      return not byte and 0 or (byte < 0x80 and 1) or (byte >= 0xF0 and 4) or (byte >= 0xE0 and 3) or (byte >= 0xC0 and 2) or 1
+    end
 
-local function utf8charbytes(str, bs)
-	return utf8symbollen(byte(str, bs))
-end
+    local function utf8charbytes(str, bs)
+      return utf8symbollen(byte(str, bs))
+    end
 
-local function utf8next(str, bs)
-  return bs + utf8charbytes(str, bs)
-end
+    local function utf8next(str, bs)
+      return bs + utf8charbytes(str, bs)
+    end
 
--- returns the number of characters in a UTF-8 string
-local function utf8len (str)
-	local bs = 1
-	local bytes = len(str)
-	local length = 0
+    -- returns the number of characters in a UTF-8 string
+    local function utf8len (str)
+      local bs = 1
+      local bytes = len(str)
+      local length = 0
 
-	while bs <= bytes do
-		length = length + 1
-		bs = utf8next(str, bs)
-	end
+      while bs <= bytes do
+        length = length + 1
+        bs = utf8next(str, bs)
+      end
 
-	return length
-end
+      return length
+    end
 
--- functions identically to string.sub except that i and j are UTF-8 characters
--- instead of bytes
-local function utf8sub (s, i, j)
-	-- argument defaults
-	j = j or -1
+    -- functions identically to string.sub except that i and j are UTF-8 characters
+    -- instead of bytes
+    local function utf8sub (s, i, j)
+      -- argument defaults
+      j = j or -1
 
-	local bs = 1
-	local bytes = len(s)
-	local length = 0
+      local bs = 1
+      local bytes = len(s)
+      local length = 0
 
-	local l = (i >= 0 and j >= 0) or utf8len(s)
-  i = (i >= 0) and i or l + i + 1
-	j = (j >= 0) and j or l + j + 1
+      local l = (i >= 0 and j >= 0) or utf8len(s)
+      i = (i >= 0) and i or l + i + 1
+      j = (j >= 0) and j or l + j + 1
 
-	if i > j then
-		return ""
-	end
+      if i > j then
+        return ""
+      end
 
-	local start, finish = 1, bytes
+      local start, finish = 1, bytes
 
-	while bs <= bytes do
-		length = length + 1
+      while bs <= bytes do
+        length = length + 1
 
-		if length == i then
-			start = bs
-		end
+        if length == i then
+          start = bs
+        end
 
-		bs = utf8next(s, bs)
+        bs = utf8next(s, bs)
 
-		if length == j then
-			finish = bs - 1
-			break
-		end
-	end
+        if length == j then
+          finish = bs - 1
+          break
+        end
+      end
 
-	if i > length then start = bytes + 1 end
-	if j < 1 then finish = 0 end
+      if i > length then start = bytes + 1 end
+      if j < 1 then finish = 0 end
 
-	return sub(s, start, finish)
-end
+      return sub(s, start, finish)
+    end
 
--- http://en.wikipedia.org/wiki/Utf8
--- http://developer.coronalabs.com/code/utf-8-conversion-utility
-local function utf8char(...)
-	local codes = {...}
-	local result = {}
+    -- http://en.wikipedia.org/wiki/Utf8
+    -- http://developer.coronalabs.com/code/utf-8-conversion-utility
+    local function utf8char(...)
+      local codes = {...}
+      local result = {}
 
-	for _, unicode in ipairs(codes) do
+      for _, unicode in ipairs(codes) do
 
-		if unicode <= 0x7F then
-			result[#result + 1] = char(unicode)
-		elseif unicode <= 0x7FF then
-			local b0 = 0xC0 + math.floor(unicode / 0x40);
-			local b1 = 0x80 + (unicode % 0x40);
-			result[#result + 1] = char(b0, b1);
-		elseif unicode <= 0xFFFF then
-			local b0 = 0xE0 +  math.floor(unicode / 0x1000);
-			local b1 = 0x80 + (math.floor(unicode / 0x40) % 0x40);
-			local b2 = 0x80 + (unicode % 0x40);
-			result[#result + 1] = char(b0, b1, b2);
-		elseif unicode <= 0x10FFFF then
-			local code = unicode
-			local b3= 0x80 + (code % 0x40);
-			code       = math.floor(code / 0x40)
-			local b2= 0x80 + (code % 0x40);
-			code       = math.floor(code / 0x40)
-			local b1= 0x80 + (code % 0x40);
-			code       = math.floor(code / 0x40)
-			local b0= 0xF0 + code;
+        if unicode <= 0x7F then
+          result[#result + 1] = unicode
+        elseif unicode <= 0x7FF then
+          local b0 = 0xC0 + math.floor(unicode / 0x40);
+          local b1 = 0x80 + (unicode % 0x40);
+          result[#result + 1] = b0
+          result[#result + 1] = b1
+        elseif unicode <= 0xFFFF then
+          local b0 = 0xE0 +  math.floor(unicode / 0x1000);
+          local b1 = 0x80 + (math.floor(unicode / 0x40) % 0x40);
+          local b2 = 0x80 + (unicode % 0x40);
+          result[#result + 1] = b0
+          result[#result + 1] = b1
+          result[#result + 1] = b2
+        elseif unicode <= 0x10FFFF then
+          local code = unicode
+          local b3= 0x80 + (code % 0x40);
+          code       = math.floor(code / 0x40)
+          local b2= 0x80 + (code % 0x40);
+          code       = math.floor(code / 0x40)
+          local b1= 0x80 + (code % 0x40);
+          code       = math.floor(code / 0x40)
+          local b0= 0xF0 + code;
 
-			result[#result + 1] = char(b0, b1, b2, b3);
-		else
-			error 'Unicode cannot be greater than U+10FFFF!'
-		end
+          result[#result + 1] = b0
+          result[#result + 1] = b1
+          result[#result + 1] = b2
+          result[#result + 1] = b3
+        else
+          error 'Unicode cannot be greater than U+10FFFF!'
+        end
 
-	end
+      end
 
-	return table.concat(result)
-end
+      return char(utf8.config.unpack(result))
+    end
 
-local shift_6  = 2^6
-local shift_12 = 2^12
-local shift_18 = 2^18
 
-local utf8unicode
-utf8unicode = function(str, i, j, byte_pos)
-	i = i or 1
-	j = j or i
+    local shift_6  = 2^6
+    local shift_12 = 2^12
+    local shift_18 = 2^18
 
-	local str_len = utf8len(str)
-	i = i < 0 and str_len + i + 1 or i
-	j = j < 0 and str_len + j + 1 or j
-	j = j > str_len and str_len or j
+    local utf8unicode
+    utf8unicode = function(str, ibs, jbs)
+      if ibs > jbs then return end
 
-	if i > j then return end
+      local ch,bytes
 
-	local ch,bytes
+      bytes = utf8charbytes(str, ibs)
+      if bytes == 0 then return end
+      ch  = sub(str,ibs,ibs-1+bytes)
 
-	if byte_pos then
-		bytes = utf8charbytes(str,byte_pos)
-		ch  = sub(str,byte_pos,byte_pos-1+bytes)
-	else
-		ch,byte_pos = utf8sub(str,i,i), 0
-		bytes       = #ch
-	end
+      local unicode
 
-	local unicode
+      if bytes == 1 then unicode = byte(ch) end
+      if bytes == 2 then
+        local byte0,byte1 = byte(ch,1,2)
+        if byte0 and byte1 then
+          local code0,code1 = byte0-0xC0,byte1-0x80
+          unicode = code0*shift_6 + code1
+        else
+          unicode = byte0
+        end
+      end
+      if bytes == 3 then
+        local byte0,byte1,byte2 = byte(ch,1,3)
+        if byte0 and byte1 and byte2 then
+          local code0,code1,code2 = byte0-0xE0,byte1-0x80,byte2-0x80
+          unicode = code0*shift_12 + code1*shift_6 + code2
+        else
+          unicode = byte0
+        end
+      end
+      if bytes == 4 then
+        local byte0,byte1,byte2,byte3 = byte(ch,1,4)
+        if byte0 and byte1 and byte2 and byte3 then
+          local code0,code1,code2,code3 = byte0-0xF0,byte1-0x80,byte2-0x80,byte3-0x80
+          unicode = code0*shift_18 + code1*shift_12 + code2*shift_6 + code3
+        else
+          unicode = byte0
+        end
+      end
 
-	if bytes == 1 then unicode = byte(ch) end
-	if bytes == 2 then
-		local byte0,byte1 = byte(ch,1,2)
-		local code0,code1 = byte0-0xC0,byte1-0x80
-		unicode = code0*shift_6 + code1
-	end
-	if bytes == 3 then
-		local byte0,byte1,byte2 = byte(ch,1,3)
-		local code0,code1,code2 = byte0-0xE0,byte1-0x80,byte2-0x80
-		unicode = code0*shift_12 + code1*shift_6 + code2
-	end
-	if bytes == 4 then
-		local byte0,byte1,byte2,byte3 = byte(ch,1,4)
-		local code0,code1,code2,code3 = byte0-0xF0,byte1-0x80,byte2-0x80,byte3-0x80
-		unicode = code0*shift_18 + code1*shift_12 + code2*shift_6 + code3
-	end
+      return unicode,utf8unicode(str, ibs+bytes, jbs)
+    end
 
-	return unicode,utf8unicode(str, i+1, j, byte_pos+bytes)
-end
+    local function utf8byte(str, i, j)
+      if #str == 0 then return end
 
-local function utf8gensub(str, sub_len)
-	sub_len = sub_len or 1
-  local max_len = #str
-  return function(skip_ptr, bs)
-    bs = (bs and bs or 1) + (skip_ptr and (skip_ptr[1] or 0) or 0)
+      local ibs, jbs
 
-		nbs = bs
-    if bs > max_len then return nil end
-		for i = 1, sub_len do
-			nbs = utf8next(str, nbs)
-		end
+      if i or j then
+        i = i or 1
+        j = j or i
 
-    return nbs, sub(str, bs, nbs - 1), bs
-  end
-end
+        local str_len = utf8len(str)
+        i = i < 0 and str_len + i + 1 or i
+        j = j < 0 and str_len + j + 1 or j
+        j = j > str_len and str_len or j
 
-local function utf8reverse (s)
-	local result = ''
-	for _, w in utf8gensub(s) do result = w .. result end
-	return result
-end
+        if i > j then return end
 
-local function utf8validator(str, bs)
-	bs = bs or 1
+        for p = 1, i - 1 do
+          ibs = utf8next(str, ibs or 1)
+        end
 
-	if type(str) ~= "string" then
-		error("bad argument #1 to 'utf8charbytes' (string expected, got ".. type(str).. ")")
-	end
-	if type(bs) ~= "number" then
-		error("bad argument #2 to 'utf8charbytes' (number expected, got ".. type(bs).. ")")
-	end
+        if i == j then
+          jbs = ibs
+        else
+          for p = 1, j - 1 do
+            jbs = utf8next(str, jbs or 1)
+          end
+        end
 
-	local c = byte(str, bs)
-	if not c then return end
+        if not ibs or not jbs then
+          return nil
+        end
+      else
+        ibs, jbs = 1, 1
+      end
 
-	-- determine bytes needed for character, based on RFC 3629
+      print(str, ibs, jbs)
 
-	-- UTF8-1
-	if c >= 0 and c <= 127 then
-		return bs + 1
-	elseif c >= 128 and c <= 193 then
-		return bs + 1, bs, 1, c
-	-- UTF8-2
-	elseif c >= 194 and c <= 223 then
-		local c2 = byte(str, bs + 1)
-		if not c2 or c2 < 128 or c2 > 191 then
-			return bs + 2, bs, 2, c2
-		end
+      return utf8unicode(str, ibs, jbs)
+    end
 
-		return bs + 2
-	-- UTF8-3
-	elseif c >= 224 and c <= 239 then
-		local c2 = byte(str, bs + 1)
+    local function utf8gensub(str, sub_len)
+      sub_len = sub_len or 1
+      local max_len = #str
+      return function(skip_ptr, bs)
+        bs = (bs and bs or 1) + (skip_ptr and (skip_ptr[1] or 0) or 0)
 
-		if not c2 then
-			return bs + 2, bs, 2, c2
-		end
+        nbs = bs
+        if bs > max_len then return nil end
+        for i = 1, sub_len do
+          nbs = utf8next(str, nbs)
+        end
 
-		-- validate byte 2
-		if c == 224 and (c2 < 160 or c2 > 191) then
-			return bs + 2, bs, 2, c2
-		elseif c == 237 and (c2 < 128 or c2 > 159) then
-			return bs + 2, bs, 2, c2
-		elseif c2 < 128 or c2 > 191 then
-			return bs + 2, bs, 2, c2
-		end
+        return nbs, sub(str, bs, nbs - 1), bs
+      end
+    end
 
-		local c3 = byte(str, bs + 2)
-		if not c3 or c3 < 128 or c3 > 191 then
-			return bs + 3, bs, 3, c3
-		end
+    local function utf8reverse (s)
+      local result = ''
+      for _, w in utf8gensub(s) do result = w .. result end
+      return result
+    end
 
-		return bs + 3
-	-- UTF8-4
-	elseif c >= 240 and c <= 244 then
-		local c2 = byte(str, bs + 1)
+    local function utf8validator(str, bs)
+      bs = bs or 1
 
-		if not c2 then
-			return bs + 2, bs, 2, c2
-		end
+      if type(str) ~= "string" then
+        error("bad argument #1 to 'utf8charbytes' (string expected, got ".. type(str).. ")")
+      end
+      if type(bs) ~= "number" then
+        error("bad argument #2 to 'utf8charbytes' (number expected, got ".. type(bs).. ")")
+      end
 
-		-- validate byte 2
-		if c == 240 and (c2 < 144 or c2 > 191) then
-			return bs + 2, bs, 2, c2
-		elseif c == 244 and (c2 < 128 or c2 > 143) then
-			return bs + 2, bs, 2, c2
-		elseif c2 < 128 or c2 > 191 then
-			return bs + 2, bs, 2, c2
-		end
+      local c = byte(str, bs)
+      if not c then return end
 
-		local c3 = byte(str, bs + 2)
-		if not c3 or c3 < 128 or c3 > 191 then
-			return bs + 3, bs, 3, c3
-		end
+      -- determine bytes needed for character, based on RFC 3629
 
-		local c4 = byte(str, bs + 3)
-		if not c4 or c4 < 128 or c4 > 191 then
-			return bs + 4, bs, 4, c4
-		end
+      -- UTF8-1
+      if c >= 0 and c <= 127 then
+        return bs + 1
+      elseif c >= 128 and c <= 193 then
+        return bs + 1, bs, 1, c
+          -- UTF8-2
+      elseif c >= 194 and c <= 223 then
+        local c2 = byte(str, bs + 1)
+        if not c2 or c2 < 128 or c2 > 191 then
+          return bs + 2, bs, 2, c2
+        end
 
-		return bs + 4
-	else -- c > 245
-		return bs + 1, bs, 1, c
-	end
-end
+        return bs + 2
+          -- UTF8-3
+      elseif c >= 224 and c <= 239 then
+        local c2 = byte(str, bs + 1)
 
-local function utf8validate(str, byte_pos)
-	local result = {}
-	for nbs, bs, part, code in utf8validator, str, byte_pos do
-		if bs then
-			result[#result + 1] = { pos = bs, part = part, code = code }
-		end
-	end
-	return #result == 0, result
-end
+        if not c2 then
+          return bs + 2, bs, 2, c2
+        end
 
-utf8.len      = utf8len
-utf8.sub      = utf8sub
-utf8.reverse  = utf8reverse
-utf8.char     = utf8char
-utf8.unicode  = utf8unicode
-utf8.byte     = utf8unicode
-utf8.next     = utf8next
-utf8.gensub   = utf8gensub
-utf8.validate = utf8validate
-utf8.dump     = dump
-utf8.format   = format
-utf8.lower    = lower
-utf8.upper    = upper
-utf8.rep      = rep
-utf8.raw = {}
-for k,v in pairs(string) do
-  utf8.raw[k] = v
-end
-return utf8
+        -- validate byte 2
+        if c == 224 and (c2 < 160 or c2 > 191) then
+          return bs + 2, bs, 2, c2
+        elseif c == 237 and (c2 < 128 or c2 > 159) then
+          return bs + 2, bs, 2, c2
+        elseif c2 < 128 or c2 > 191 then
+          return bs + 2, bs, 2, c2
+        end
+
+        local c3 = byte(str, bs + 2)
+        if not c3 or c3 < 128 or c3 > 191 then
+          return bs + 3, bs, 3, c3
+        end
+
+        return bs + 3
+          -- UTF8-4
+      elseif c >= 240 and c <= 244 then
+        local c2 = byte(str, bs + 1)
+
+        if not c2 then
+          return bs + 2, bs, 2, c2
+        end
+
+        -- validate byte 2
+        if c == 240 and (c2 < 144 or c2 > 191) then
+          return bs + 2, bs, 2, c2
+        elseif c == 244 and (c2 < 128 or c2 > 143) then
+          return bs + 2, bs, 2, c2
+        elseif c2 < 128 or c2 > 191 then
+          return bs + 2, bs, 2, c2
+        end
+
+        local c3 = byte(str, bs + 2)
+        if not c3 or c3 < 128 or c3 > 191 then
+          return bs + 3, bs, 3, c3
+        end
+
+        local c4 = byte(str, bs + 3)
+        if not c4 or c4 < 128 or c4 > 191 then
+          return bs + 4, bs, 4, c4
+        end
+
+        return bs + 4
+      else -- c > 245
+        return bs + 1, bs, 1, c
+      end
+    end
+
+    local function utf8validate(str, byte_pos)
+      local result = {}
+      for nbs, bs, part, code in utf8validator, str, byte_pos do
+        if bs then
+          result[#result + 1] = { pos = bs, part = part, code = code }
+        end
+      end
+      return #result == 0, result
+    end
+
+    utf8.len      = utf8len
+    utf8.sub      = utf8sub
+    utf8.reverse  = utf8reverse
+    utf8.char     = utf8char
+    utf8.unicode  = utf8unicode
+    utf8.byte     = utf8byte
+    utf8.next     = utf8next
+    utf8.gensub   = utf8gensub
+    utf8.validate = utf8validate
+    utf8.dump     = dump
+    utf8.format   = format
+    utf8.lower    = lower
+    utf8.upper    = upper
+    utf8.rep      = rep
+    utf8.raw = {}
+    for k,v in pairs(string) do
+      utf8.raw[k] = v
+    end
+    return utf8
 
 end
