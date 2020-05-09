@@ -12,7 +12,7 @@ if provided then
   end
 end
 
-if false and pcall(require, "tarantool") then -- todo
+if pcall(require, "tarantool") then
   return utf8:require "primitives.tarantool"
 elseif pcall(require, "ffi") then
   return utf8:require "primitives.native"
