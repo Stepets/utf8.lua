@@ -73,7 +73,11 @@ local function parse(str, c, bs, ctx)
     end
     ctx.internal = old_internal
   elseif c == '.' then
-    class = cl.new():invert()
+    if not ctx.internal then
+      class = cl.new():invert()
+    else
+      class = cl.new():with_codes(c)
+    end
   end
 
   return class, utf8.next(str, nbs) - bs

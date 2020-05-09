@@ -99,6 +99,17 @@ assert_equals({parse("aad-", "d", 3, ctx)}, {
 })
 assert_equals(ctx.internal, false)
 
+ctx.internal = false
+assert_equals({parse(".", ".", 1, ctx)}, {
+  {inverted = true},
+  utf8.raw.len(".")
+})
+
+assert_equals({parse("[.]", "[", 1, ctx)}, {
+  {codes = {utf8.byte(".")}},
+  utf8.raw.len("[.]")
+})
+
 --[[--
 multibyte chars
 --]]--

@@ -173,4 +173,6 @@ assert_equals({"bbacbb", "bb"}, res)
 assert_equals("a**", ("a**v"):match("a**+"))
 assert_equals("a", ("a**v"):match("a**-"))
 
+assert_equals({"test", "."}, {("test.lua"):match("(.-)([.])")})
+
 print("\ntests passed\n")

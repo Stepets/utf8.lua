@@ -1,4 +1,5 @@
-local module_path = (...):match("^(.-)[^.]+$") -- cut last module name part
+local module_path = ...
+module_path = module_path:match("^(.-)init$") or (module_path .. '.')
 local utf8 = {
   config = {},
   default = {
