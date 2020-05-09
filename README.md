@@ -1,105 +1,18 @@
 # utf8.lua
-one-file pure-lua 5.1 regex library
+pure-lua 5.3 regex library for Lua 5.3, Lua 5.1, LuaJIT
 
-This library _is_ the simple way to add utf8 support into your application.
+This library provides simple way to add UTF-8 support into your application.
 
-Some examples from http://www.lua.org/manual/5.1/manual.html#5.4 :
+#### Example:
 ```Lua
-local utf8 = require "utf8"
-
-local s = "hello world from Lua"
-for w in string.gmatch(s, "%a+") do
-    print(w)
-end
---[[
-hello
-world
-from
-Lua
-]]--
-
-s = "Привет, мир, от Lua"
-for w in utf8.gmatch(s, "[^%p%d%s%c]+") do
-    print(w)
-end
---[[
-Привет
-мир
-от
-Lua
-]]--
-
-local t = {}
-s = "from=world, to=Lua"
-for k, v in string.gmatch(s, "(%w+)=(%w+)") do
-    t[k] = v
-end
-for k,v in pairs(t) do
-    print(k,v)
-end
---[[
-to	Lua
-from	world
-]]--
-
-t = {}
-s = "从=世界, 到=Lua"
-for k, v in utf8.gmatch(s, "([^%p%s%c]+)=([^%p%s%c]+)") do
-    t[k] = v
-end
-for k,v in pairs(t) do
-    print(k,v)
-end
---[[
-到	Lua
-从	世界
-]]--
-
-local x = string.gsub("hello world", "(%w+)", "%1 %1")
-print(x)
---hello hello world world
-
-x = utf8.gsub("Ahoj světe", "([^%p%s%c]+)", "%1 %1")
-print(x)
---Ahoj Ahoj světe světe
-
-x = string.gsub("hello world", "%w+", "%0 %0", 1)
-print(x)
---hello hello world
-
-x = utf8.gsub("Ahoj světe", "[^%p%s%c]+", "%0 %0", 1)
-print(x)
---Ahoj Ahoj světe
-
-x = string.gsub("hello world from Lua", "(%w+)%s*(%w+)", "%2 %1")
-print(x)
---world hello Lua from
-
-x = utf8.gsub("γεια κόσμο από Lua", "([^%p%s%c]+)%s*([^%p%s%c]+)", "%2 %1")
-print(x)
---κόσμο γεια Lua από
-```
-Notice, there are some classes that can work only with latin(ASCII) symbols,
-for details see: https://github.com/Stepets/utf8.lua/blob/master/utf8.lua#L470
-
-Of course you can do this trick:
-```Lua
+local utf8 = require('.utf8'):init()
 for k,v in pairs(utf8) do
-        string[k] = v
-end
-```
-But this can lead to very strange errors. You were warned.
-
-A little bit more interesting examples:
-```Lua
-local utf8 = require 'utf8'
-for k,v in pairs(utf8) do
-        string[k] = v
+  string[k] = v
 end
 
 local str = "пыщпыщ ололоо я водитель нло"
 print(str:find("(.л.+)н"))
--- 8	26	ололоо я водитель 
+-- 8	26	ололоо я водитель
 
 print(str:gsub("ло+", "보라"))
 -- пыщпыщ о보라보라 я водитель н보라	3
@@ -107,3 +20,43 @@ print(str:gsub("ло+", "보라"))
 print(str:match("^п[лопыщ ]*я"))
 -- пыщпыщ ололоо я
 ```
+
+#### Usage:
+
+This library can be used as drop-in replacement for vanilla string library. It exports all vanilla functions under `raw` sub-object.
+
+```Lua
+local utf8 = require('.utf8'):init()
+local str = "пыщпыщ ололоо я водитель нло"
+utf8.gsub(str, "ло+", "보라")
+-- пыщпыщ о보라보라 я водитель н보라	3
+utf8.raw.gsub(str, "ло+", "보라")
+-- пыщпыщ о보라보라о я водитель н보라	3
+```
+
+It also provides all functions from Lua 5.3 UTF-8 [module](https://www.lua.org/manual/5.3/manual.html#6.5) except `utf8.len (s [, i [, j]])`. If you need to validate your strings use `utf8.validate(str, byte_pos)` or iterate over with `utf8.validator`.
+
+#### Installation
+
+Download repository to your project folder. (no rockspecs yet)
+
+As of Lua 5.3 default `utf8` module has precedence over user-provided. In this case you can specify full module path (`.utf8`).
+
+#### Configuration:
+
+Library is highly modular. You can provide your implementation for almost any function used. Library already has several back-ends:
+- [Runtime character class processing](charclass/runtime/init.lua) using hardcoded codepoint ranges or using native functions through `ffi`.
+- [Basic functions](primitives/init.lua) for working with UTF-8 characters have specializations for `ffi`-enabled runtime and for tarantool.
+
+Probably most interesting [customizations](init.lua) are `utf8.config.loadstring` and `utf8.config.cache` if you want to precompile your regexes.
+
+```Lua
+local utf8 = require('.utf8')
+utf8.config = {
+  cache = my_smart_cache,
+}
+utf8:init()
+```
+Customization is done before initialization. If you want, you can change configuration after `init`, it might work for everything but modules. All of them should be reloaded.
+
+#### [Documentation](test/test.lua)
