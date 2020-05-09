@@ -30,6 +30,70 @@ assert_equals(100, ("фыва"):next(100))
 assert_equals(#"ф" + 1, ("фыва"):next(1))
 assert_equals("ыва", utf8.raw.sub("фыва", ("фыва"):next(1)))
 
+res = {}
+for p, c in ("абвгд"):codes() do res[#res + 1] = {p, c} end
+assert_equals({
+  {1, utf8.byte'а'},
+  {#'а' + 1, utf8.byte'б'},
+  {#'аб' + 1, utf8.byte'в'},
+  {#'абв' + 1, utf8.byte'г'},
+  {#'абвг' + 1, utf8.byte'д'},
+}, res)
+
+assert_equals(1, utf8.offset('abcde', 0))
+
+assert_equals(1, utf8.offset('abcde', 1))
+assert_equals(5, utf8.offset('abcde', 5))
+assert_equals(6, utf8.offset('abcde', 6))
+assert_equals(nil, utf8.offset('abcde', 7))
+
+assert_equals(5, utf8.offset('abcde', -1))
+assert_equals(1, utf8.offset('abcde', -5))
+assert_equals(nil, utf8.offset('abcde', -6))
+
+assert_equals(1, utf8.offset('abcde', 0, 1))
+assert_equals(3, utf8.offset('abcde', 0, 3))
+assert_equals(6, utf8.offset('abcde', 0, 6))
+
+assert_equals(3, utf8.offset('abcde', 1, 3))
+assert_equals(5, utf8.offset('abcde', 3, 3))
+assert_equals(6, utf8.offset('abcde', 4, 3))
+assert_equals(nil, utf8.offset('abcde', 5, 3))
+
+assert_equals(2, utf8.offset('abcde', -1, 3))
+assert_equals(1, utf8.offset('abcde', -2, 3))
+assert_equals(5, utf8.offset('abcde', -1, 6))
+assert_equals(nil, utf8.offset('abcde', -3, 3))
+
+assert_equals(1, utf8.offset('абвгд', 0))
+
+assert_equals(1, utf8.offset('абвгд', 1))
+assert_equals(#'абвг' + 1, utf8.offset('абвгд', 5))
+assert_equals(#'абвгд' + 1, utf8.offset('абвгд', 6))
+assert_equals(nil, utf8.offset('абвгд', 7))
+
+assert_equals(#'абвг' + 1, utf8.offset('абвгд', -1))
+assert_equals(1, utf8.offset('абвгд', -5))
+assert_equals(nil, utf8.offset('абвгд', -6))
+
+assert_equals(1, utf8.offset('абвгд', 0, 1))
+assert_equals(1, utf8.offset('абвгд', 0, 2))
+assert_equals(#'аб' + 1, utf8.offset('абвгд', 0, #'аб' + 1))
+assert_equals(#'аб' + 1, utf8.offset('абвгд', 0, #'аб' + 2))
+assert_equals(#'абвгд' + 1, utf8.offset('абвгд', 0, #'абвгд' + 1))
+
+assert_equals(#'аб' + 1, utf8.offset('абвгд', 1, #'аб' + 1))
+assert_equals(#'абвг' + 1, utf8.offset('абвгд', 3, #'аб' + 1))
+assert_equals(#'абвгд' + 1, utf8.offset('абвгд', 4, #'аб' + 1))
+print()
+assert_equals(#'абвгд' + 1, utf8.offset('абвгд', 4, #'аб' + 2))
+assert_equals(nil, utf8.offset('абвгд', 5, #'аб' + 1))
+
+assert_equals(#'а' + 1, utf8.offset('абвгд', -1, #'аб' + 1))
+assert_equals(1, utf8.offset('абвгд', -2, #'аб' + 1))
+assert_equals(#'абвг' + 1, utf8.offset('абвгд', -1, #'абвгд' + 1))
+assert_equals(nil, utf8.offset('абвгд', -3, #'аб' + 1))
+
 assert(("фыва"):validate())
 assert_equals({false, {{ pos = #"ф" + 1, part = 1, code = 255 }} }, {("ф\255ыва"):validate()})
 if LUA_53 then
