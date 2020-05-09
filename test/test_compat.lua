@@ -1,6 +1,6 @@
 local utf8 = require 'init'
 utf8.config = {
-  debug = utf8:require("util").debug
+  debug = nil, --utf8:require("util").debug
 }
 utf8:init()
 print('testing utf8 library')
@@ -81,7 +81,6 @@ if LUA_53 then
   assert(utf8.raw.char(utf8.raw.byte("\xe4l\0�u", -10, 100)) == "\xe4l\0�u")
 end
 
-print(utf8.upper("abcdef"), utf8.len("abcdef"))
 assert(utf8.upper("ab\0c") == "AB\0C")
 assert(utf8.lower("\0ABCc%$") == "\0abcc%$")
 assert(utf8.rep('teste', 0) == '')

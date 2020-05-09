@@ -272,8 +272,6 @@ local function utf8byte(str, i, j)
     ibs, jbs = 1, 1
   end
 
-  print(str, ibs, jbs)
-
   return utf8unicode(str, ibs, jbs)
 end
 

@@ -1,11 +1,10 @@
 local utf8 = require('init')
 utf8.config = {
-  debug = utf8:require("util").debug,
+  debug = nil, --utf8:require("util").debug
 }
 utf8:init()
 for k,v in pairs(utf8) do
   string[k] = v
-  print(k,v)
 end
 
 local LUA_51, LUA_53 = false, false
@@ -85,7 +84,6 @@ assert_equals(#'абвгд' + 1, utf8.offset('абвгд', 0, #'абвгд' + 1)
 assert_equals(#'аб' + 1, utf8.offset('абвгд', 1, #'аб' + 1))
 assert_equals(#'абвг' + 1, utf8.offset('абвгд', 3, #'аб' + 1))
 assert_equals(#'абвгд' + 1, utf8.offset('абвгд', 4, #'аб' + 1))
-print()
 assert_equals(#'абвгд' + 1, utf8.offset('абвгд', 4, #'аб' + 2))
 assert_equals(nil, utf8.offset('абвгд', 5, #'аб' + 1))
 
