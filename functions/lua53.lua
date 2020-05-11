@@ -71,7 +71,7 @@ local function replace(repl, args)
       else
         num = tonumber(c)
         if num then
-          ret = ret .. args[num]
+          ret = ret .. assert(args[num], "invalid capture index %" .. c)
         else
           ret = ret .. c
         end
@@ -79,13 +79,9 @@ local function replace(repl, args)
       end
     end
   elseif type(repl) == 'table' then
-    ret = repl[args[1] or args[0]] or ''
+    ret = repl[args[1]] or ''
   elseif type(repl) == 'function' then
-    if #args > 0 then
-      ret = repl(unpack(args, 1)) or ''
-    else
-      ret = repl(args[0]) or ''
-    end
+    ret = repl(unpack(args, 1)) or ''
   end
   return ret
 end
@@ -111,7 +107,13 @@ local function utf8gsub(str, regex, repl, limit)
     utf8.debug('captures:', captures)
 
     continue_pos = math.max(result.finish + 1, result.start + 1)
-    local args = {[0] = utf8sub(str, result.start, result.finish), unpack(captures)}
+    local args
+    if #captures > 0 then
+      args = {[0] = utf8sub(str, result.start, result.finish), unpack(captures)}
+    else
+      args = {[0] = utf8sub(str, result.start, result.finish)}
+      args[1] = args[0]
+    end
 
     subbed = subbed .. utf8sub(str, prev_sub_finish, result.start - 1)
     subbed = subbed .. replace(repl, args)

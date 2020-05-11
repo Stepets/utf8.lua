@@ -184,4 +184,8 @@ assert_equals({"", "items"}, {("items"):match("^(.-)([^.]*)$")})
 -- https://github.com/Stepets/utf8.lua/issues/4
 assert_equals({"ab.123", 1}, {("ab.?"):gsub("%?", "123")})
 
+-- https://github.com/Stepets/utf8.lua/issues/5
+assert_equals({"ab", 1}, {("ab"):gsub("a", "%0")})
+assert_equals({"ab", 1}, {("ab"):gsub("a", "%1")})
+
 print("\ntests passed\n")
