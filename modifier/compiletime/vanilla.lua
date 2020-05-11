@@ -15,13 +15,13 @@ local matchers = {
     while ]] .. class_name .. [[:test(ctx:get_charcode()) do
       ctx:next_char()
       table.insert(saved, ctx:clone())
-      debug('#saved', #saved)
+      debug('#saved <<', #saved)
     end
     while #saved > 0 do
       ctx = table.remove(saved)
       ctx:next_function()
       ctx:get_function()(ctx)
-      debug('#saved', #saved)
+      debug('#saved >>', #saved)
     end
   end)
 ]]
@@ -82,6 +82,7 @@ local matchers = {
     cap.finish_byte = byte_pos
     cap.finish = ctx.pos
     ctx.captures[cap.id] = utf8sub(ctx.str, cap.start, cap.finish - 1)
+    debug('capture#' .. tostring(cap.id), '[' .. tostring(cap.start).. ',' .. tostring(cap.finish) .. ']' , 'is', ctx.captures[cap.id])
     ctx:next_function()
     return ctx:get_function()(ctx)
   end)

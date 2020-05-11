@@ -150,7 +150,7 @@ function class:do_test(char_code)
   if not char_code then return false end
   local found = (self:in_codes(char_code) or self:in_ranges(char_code) or self:in_classes(char_code) or self:in_subs(char_code)) and not self:in_not_classes(char_code)
   utf8.debug('class:do_test', 'found', found, 'inverted', self.inverted, 'result', self.inverted and not found or found)
-  utf8.debug(self:in_codes(char_code), self:in_ranges(char_code), self:in_classes(char_code), self:in_subs(char_code), not self:in_not_classes(char_code))
+  -- utf8.debug(self:in_codes(char_code), self:in_ranges(char_code), self:in_classes(char_code), self:in_subs(char_code), not self:in_not_classes(char_code))
   -- ternary if ideom (self.inverted and not found or found) doesn't work with booleans >_<
   if self.inverted then
     return not found
