@@ -46,6 +46,8 @@ local function parse(str, c, bs, ctx)
       else
         class = cl.new():with_classes(matched)
       end
+    else
+      class = cl.new():with_codes(c)
     end
   elseif c == '[' then
     local old_internal = ctx.internal

@@ -181,4 +181,7 @@ assert_equals({"ab", ""}, {("ab"):match("^([ab]-)([^b]*)$")})
 assert_equals({"items.", ""}, {("items."):match("^(.-)([^.]*)$")})
 assert_equals({"", "items"}, {("items"):match("^(.-)([^.]*)$")})
 
+-- https://github.com/Stepets/utf8.lua/issues/4
+assert_equals({"ab.123", 1}, {("ab.?"):gsub("%?", "123")})
+
 print("\ntests passed\n")

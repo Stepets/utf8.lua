@@ -110,6 +110,11 @@ assert_equals({parse("[.]", "[", 1, ctx)}, {
   utf8.raw.len("[.]")
 })
 
+assert_equals({parse("%?", "%", 1, ctx)}, {
+  {codes = {utf8.byte("?")}},
+  utf8.raw.len("%?")
+})
+
 --[[--
 multibyte chars
 --]]--
