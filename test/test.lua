@@ -188,4 +188,6 @@ assert_equals({"ab.123", 1}, {("ab.?"):gsub("%?", "123")})
 assert_equals({"ab", 1}, {("ab"):gsub("a", "%0")})
 assert_equals({"ab", 1}, {("ab"):gsub("a", "%1")})
 
+assert_equals("c", ("abc"):match("c", -1))
+
 print("\ntests passed\n")

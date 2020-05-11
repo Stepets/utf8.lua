@@ -19,7 +19,8 @@ local function utf8find(str, regex, init, plain)
 end
 
 local function utf8match(str, regex, init)
-  local func = get_matcher_function(regex, plain, utf8)
+  local func = get_matcher_function(regex, false)
+  init = ((init or 1) < 0) and (utf8.len(str) + init + 1) or init
   local ctx, result, captures = func(str, init, utf8)
   if not ctx then return nil end
 
@@ -34,7 +35,7 @@ end
 
 local function utf8gmatch(str, regex)
   regex = (utf8sub(regex,1,1) ~= '^') and regex or '%' .. regex
-  local func = get_matcher_function(regex, plain, utf8)
+  local func = get_matcher_function(regex, false)
   local ctx, result, captures
   local continue_pos = 1
 
@@ -92,7 +93,7 @@ local function utf8gsub(str, regex, repl, limit)
   local prev_sub_finish = 1
 
   regex = (utf8sub(regex,1,1) ~= '^') and regex or '%' .. regex
-  local func = get_matcher_function(regex, plain, utf8)
+  local func = get_matcher_function(regex, false)
   local ctx, result, captures
   local continue_pos = 1
 
