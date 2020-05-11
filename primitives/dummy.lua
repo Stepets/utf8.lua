@@ -281,7 +281,7 @@ local function utf8gensub(str, sub_len)
   return function(skip_ptr, bs)
     bs = (bs and bs or 1) + (skip_ptr and (skip_ptr[1] or 0) or 0)
 
-    nbs = bs
+    local nbs = bs
     if bs > max_len then return nil end
     for i = 1, sub_len do
       nbs = utf8next(str, nbs)

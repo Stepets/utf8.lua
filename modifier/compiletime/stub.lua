@@ -15,7 +15,7 @@ end
 
 local function check(ctx)
   if ctx.prev_class then
-    table.insert(ctx.funcs, matchers.simple(ctx.prev_class, tostring(bs)))
+    table.insert(ctx.funcs, matchers.simple(ctx.prev_class, tostring(ctx.pos)))
     ctx.prev_class = nil
   end
 end

@@ -1,3 +1,5 @@
+require "test.strict"
+
 local function equals(t1, t2)
   for k,v in pairs(t1) do
     if t2[k] == nil then return false end
