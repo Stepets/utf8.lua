@@ -3,7 +3,22 @@ return function(utf8)
 local utf8sub = utf8.sub
 local utf8gensub = utf8.gensub
 local unpack = utf8.config.unpack
-local get_matcher_function = utf8:require 'regex_parser'
+local generate_matcher_function = utf8:require 'regex_parser'
+
+function get_matcher_function(regex, plain)
+  local res
+  if utf8.config.cache then
+    res = utf8.config.cache[plain and "plain" or "regex"][regex]
+  end
+  if res then
+    return res
+  end
+  res = generate_matcher_function(regex, plain)
+  if utf8.config.cache then
+    utf8.config.cache[plain and "plain" or "regex"][regex] = res
+  end
+  return res
+end
 
 local function utf8find(str, regex, init, plain)
   local func = get_matcher_function(regex, plain)
