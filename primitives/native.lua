@@ -1,12 +1,19 @@
 return function(utf8)
 
-os.setlocale(utf8.config.locale, "ctype")
-
-local ffi = require("ffi")
-ffi.cdef[[
-  int towupper(int c);
-  int towlower(int c);
-]]
+  local ffi = require("ffi")
+  if ffi.os == "Windows" then
+    os.setlocale(utf8.config.locale or "english_us.65001", "ctype")
+    ffi.cdef[[
+      short towupper(short c);
+      short towlower(short c);
+    ]]
+  else
+    os.setlocale(utf8.config.locale or "C.UTF-8", "ctype")
+    ffi.cdef[[
+      int towupper(int c);
+      int towlower(int c);
+    ]]
+  end
 
 utf8:require "primitives.dummy"
 

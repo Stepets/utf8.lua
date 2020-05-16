@@ -14,11 +14,21 @@ else -- luajit lua5.3
   LUA_53 = true
 end
 
+local FFI_ENABLED = false
+if pcall(require, "ffi") then
+  FFI_ENABLED = true
+end
+
 local res = {}
 
 local equals = require 'test.util'.equals
 local assert = require 'test.util'.assert
 local assert_equals = require 'test.util'.assert_equals
+
+if FFI_ENABLED then
+  assert_equals(("АБВ"):lower(), "абв")
+  assert_equals(("абв"):upper(), "АБВ")
+end
 
 res = {}
 for _, w in ("123456789"):gensub(2), {1} do res[#res + 1] = w end

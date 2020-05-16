@@ -15,7 +15,7 @@ local utf8 = {
         __mode = 'kv'
       }),
     },
-    locale = "C.UTF-8",
+    locale = nil,
   },
   regex = {
     compiletime = {
