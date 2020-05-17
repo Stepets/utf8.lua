@@ -88,6 +88,16 @@ local matchers = {
   end)
 ]]
   end,
+  capture_position = function(number)
+    return [[
+  add(function(ctx)
+    debug(ctx, 'capture_position', ']] .. tostring(number) .. [[')
+    ctx.captures[ ]] .. tostring(number) .. [[ ] = ctx.pos
+    ctx:next_function()
+    return ctx:get_function()(ctx)
+  end)
+]]
+  end,
   capture = function(number)
     return [[
   add(function(ctx)
@@ -123,7 +133,7 @@ local matchers = {
       end
       debug("balancer: balance=", balance, ", d=", d, ", b=", b, ", charcode=", ctx:get_charcode())
       ctx:next_char()
-    until balance == 0
+    until balance == 0 or (balance == 2 and d == b)
     ctx:next_function()
     return ctx:get_function()(ctx)
   end)
@@ -139,6 +149,9 @@ local function parse(regex, c, bs, ctx)
   if c == '%' then
     c, nbs = next(regex, bs)
     utf8.debug("next", c, bs)
+    if c == '' then
+      error("malformed pattern (ends with '%')")
+    end
     if utf8.raw.find('123456789', c, 1, true) then
       functions = { matchers.capture(tonumber(c)) }
       nbs = utf8.next(regex, nbs)
@@ -146,6 +159,7 @@ local function parse(regex, c, bs, ctx)
       local d, b
       d, nbs = next(regex, nbs)
       b, nbs = next(regex, nbs)
+      assert(d ~= '' and b ~= '', "unbalanced pattern")
       functions = { matchers.balancer({d, b}, tostring(bs)) }
       nbs = utf8.next(regex, nbs)
     end
@@ -191,13 +205,19 @@ local function parse(regex, c, bs, ctx)
     nbs = bs + 1
   elseif c == '(' then
     ctx.capture = ctx.capture or {balance = 0, id = 0}
-    ctx.capture.balance = ctx.capture.balance + 1
     ctx.capture.id = ctx.capture.id + 1
-    functions = { matchers.capture_start(ctx.capture.id) }
+    local nc = next(regex, nbs)
+    if nc == ')' then
+      functions = {matchers.capture_position(ctx.capture.id)}
+      nbs = bs + 2
+    else
+      ctx.capture.balance = ctx.capture.balance + 1
+      functions = {matchers.capture_start(ctx.capture.id)}
+      nbs = bs + 1
+    end
     if ctx.prev_class then
       table.insert(functions, 1, matchers.simple(ctx.prev_class, tostring(bs)))
     end
-    nbs = bs + 1
   elseif c == ')' then
     ctx.capture = ctx.capture or {balance = 0, id = 0}
     functions = { matchers.capture_finish(ctx.capture.id) }

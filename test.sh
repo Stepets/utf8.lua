@@ -22,4 +22,6 @@ $lua53 test/test.lua
 $lua51 test/test.lua
 $luajit test/test.lua
 
+$luajit test/test_pm.lua
+
 echo "tests passed"

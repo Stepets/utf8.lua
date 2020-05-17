@@ -8,11 +8,12 @@ local matchers = {
 
   add(function(ctx) -- frontier
     ctx.pos = ctx.pos - 1
-    local prev_charcode = ctx:get_charcode()
+    local prev_charcode = ctx:get_charcode() or 0
     ctx:next_char()
-    debug("frontier pos", ctx.pos, "prev_charcode", prev_charcode, "charcode", ctx:get_charcode())
+    local charcode = ctx:get_charcode() or 0
+    debug("frontier pos", ctx.pos, "prev_charcode", prev_charcode, "charcode", charcode)
     if ]] .. class_name .. [[:test(prev_charcode) then return end
-    if ]] .. class_name .. [[:test(ctx:get_charcode()) then
+    if ]] .. class_name .. [[:test(charcode) then
       ctx:next_function()
       return ctx:get_function()(ctx)
     end

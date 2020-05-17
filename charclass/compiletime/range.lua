@@ -28,7 +28,7 @@ return function(str, c, bs, ctx)
   if c == '%' then
     c, nbs = next(str, nbs)
     r2 = c
-  elseif c ~= '' then
+  elseif c ~= '' and c ~= ']' then
     r2 = c
   end
 

@@ -71,7 +71,7 @@ function class:with_subs(...)
 end
 
 function class:in_codes(item)
-  if not self.codes then return false end
+  if not self.codes or #self.codes == 0 then return nil end
 
   local head, tail = 1, #self.codes
   local mid = math.floor((head + tail)/2)
@@ -93,7 +93,7 @@ function class:in_codes(item)
 end
 
 function class:in_ranges(char_code)
-  if not self.ranges then return false end
+  if not self.ranges or #self.ranges == 0 then return nil end
 
   for _,r in ipairs(self.ranges) do
     if r[1] <= char_code and char_code <= r[2] then
@@ -104,7 +104,7 @@ function class:in_ranges(char_code)
 end
 
 function class:in_classes(char_code)
-  if not self.classes then return false end
+  if not self.classes or #self.classes == 0 then return nil end
 
   for _, class in ipairs(self.classes) do
     if self:is(class, char_code) then
@@ -115,7 +115,7 @@ function class:in_classes(char_code)
 end
 
 function class:in_not_classes(char_code)
-  if not self.not_classes then return false end
+  if not self.not_classes or #self.not_classes == 0 then return nil end
 
   for _, class in ipairs(self.not_classes) do
     if self:is(class, char_code) then
@@ -130,7 +130,7 @@ function class:is(class, char_code)
 end
 
 function class:in_subs(char_code)
-  if not self.subs or #self.subs == 0 then return false end
+  if not self.subs or #self.subs == 0 then return nil end
 
   for _, c in ipairs(self.subs) do
     if not c:test(char_code) then
@@ -148,14 +148,34 @@ end
 
 function class:do_test(char_code)
   if not char_code then return false end
-  local found = (self:in_codes(char_code) or self:in_ranges(char_code) or self:in_classes(char_code) or self:in_subs(char_code)) and not self:in_not_classes(char_code)
-  utf8.debug('class:do_test', 'found', found, 'inverted', self.inverted, 'result', self.inverted and not found or found)
-  -- utf8.debug(self:in_codes(char_code), self:in_ranges(char_code), self:in_classes(char_code), self:in_subs(char_code), not self:in_not_classes(char_code))
-  -- ternary if ideom (self.inverted and not found or found) doesn't work with booleans >_<
-  if self.inverted then
-    return not found
+  local in_not_classes = self:in_not_classes(char_code)
+  if in_not_classes then
+    return not not self.inverted
+  end
+  local in_codes = self:in_codes(char_code)
+  if in_codes then
+    return not self.inverted
+  end
+  local in_ranges = self:in_ranges(char_code)
+  if in_ranges then
+    return not self.inverted
+  end
+  local in_classes = self:in_classes(char_code)
+  if in_classes then
+    return not self.inverted
+  end
+  local in_subs = self:in_subs(char_code)
+  if in_subs then
+    return not self.inverted
+  end
+  if (in_codes == nil)
+  and (in_ranges == nil)
+  and (in_classes == nil)
+  and (in_subs == nil)
+  and (in_not_classes == false) then
+    return not self.inverted
   else
-    return found
+    return not not self.inverted
   end
 end
 

@@ -23,7 +23,9 @@ local matchers = {
   fromstart = function(ctx)
     return [[
     add(function(ctx) -- fromstart
-        local saved = ctx:clone()
+        if ctx.pos > 1 + utf8len(ctx.str) then
+          return
+        end
         ctx.result.start = ctx.pos
         ctx:next_function()
         ctx:get_function()(ctx)

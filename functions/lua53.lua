@@ -95,9 +95,9 @@ local function replace(repl, args)
       end
     end
   elseif type(repl) == 'table' then
-    ret = repl[args[1]] or ''
+    ret = repl[args[1]] or args[0]
   elseif type(repl) == 'function' then
-    ret = repl(unpack(args, 1)) or ''
+    ret = repl(unpack(args, 1)) or args[0]
   end
   return ret
 end
@@ -107,7 +107,6 @@ local function utf8gsub(str, regex, repl, limit)
   local subbed = ''
   local prev_sub_finish = 1
 
-  regex = (utf8sub(regex,1,1) ~= '^') and regex or '%' .. regex
   local func = get_matcher_function(regex, false)
   local ctx, result, captures
   local continue_pos = 1

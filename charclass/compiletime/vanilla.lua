@@ -16,6 +16,9 @@ local function parse(str, c, bs, ctx)
 
   if c == '%' then
     c, nbs = next(str, bs)
+    if c == '' then
+      error("malformed pattern (ends with '%')")
+    end
     local _c = utf8.raw.lower(c)
     local matched
     if _c == 'a' then
@@ -46,10 +49,15 @@ local function parse(str, c, bs, ctx)
       else
         class = cl.new():with_classes(matched)
       end
+    elseif _c == 'z' then
+      class = cl.new():with_codes(0)
+      if _c ~= c then
+        class = class:invert()
+      end
     else
       class = cl.new():with_codes(c)
     end
-  elseif c == '[' then
+  elseif c == '[' and not ctx.internal then
     local old_internal = ctx.internal
     ctx.internal = true
     class = cl.new()
@@ -60,9 +68,18 @@ local function parse(str, c, bs, ctx)
       utf8.debug("next", tttt, c, nbs)
       if c == '^' and firstletter then
         class:invert()
+        local nc, nnbs = next(str, nbs)
+        if nc == ']' then
+          class:with_codes(nc)
+          nbs = nnbs
+        end
       elseif c == ']' then
-        utf8.debug('] on pos', tttt, nbs)
-        break
+        if firstletter then
+          class:with_codes(c)
+        else
+          utf8.debug('] on pos', tttt, nbs)
+          break
+        end
       elseif c == '' then
         error "malformed pattern (missing ']')"
       else
