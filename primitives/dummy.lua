@@ -427,7 +427,7 @@ local function utf8offset(str, n, bs)
       bs = 1
     end
   end
-  if bs < 0 or bs > l + 1 then
+  if bs <= 0 or bs > l + 1 then
     error("bad argument #3 to 'offset' (position out of range)")
   end
 
@@ -437,8 +437,8 @@ local function utf8offset(str, n, bs)
     end
     while true do
       local b = byte(str, bs)
-      if 0 < b and b < 127
-      or 194 < b and b < 244 then
+      if (0 < b and b < 127)
+      or (194 < b and b < 244) then
         return bs
       end
       bs = bs - 1
@@ -454,8 +454,8 @@ local function utf8offset(str, n, bs)
       end
 
       local b = byte(str, bs)
-      if 0 < b and b < 127
-      or 194 < b and b < 244 then
+      if (0 < b and b < 127)
+      or (194 < b and b < 244) then
         n = n + 1
       end
       bs = bs - 1
@@ -468,8 +468,8 @@ local function utf8offset(str, n, bs)
       end
 
       local b = byte(str, bs)
-      if 0 < b and b < 127
-      or 194 < b and b < 244 then
+      if (0 < b and b < 127)
+      or (194 < b and b < 244) then
         n = n - 1
         for i = 1, n do
           if bs > l then

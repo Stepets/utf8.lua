@@ -7,7 +7,7 @@ local matchers = {
   local ]] .. class_name .. [[ = ]] .. class .. [[
 
   add(function(ctx) -- frontier
-    ctx.pos = ctx.pos - 1
+    ctx:prev_char()
     local prev_charcode = ctx:get_charcode() or 0
     ctx:next_char()
     local charcode = ctx:get_charcode() or 0

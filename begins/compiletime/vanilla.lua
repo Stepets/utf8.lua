@@ -4,26 +4,23 @@ local matchers = {
   sliding = function()
     return [[
     add(function(ctx) -- sliding
-        local saved = ctx:clone()
-        local start_pos = ctx.pos
-        while ctx.pos <= 1 + utf8len(ctx.str) do
-            debug('starting from', ctx, "start_pos", start_pos)
-            ctx.result.start = ctx.pos
-            ctx:next_function()
-            ctx:get_function()(ctx)
+      while ctx.byte_pos <= 1 + ctx.len do
+        local clone = ctx:clone()
+        debug('starting from', clone, "start_pos", clone.pos)
+        clone.result.start = clone.pos
+        clone:next_function()
+        clone:get_function()(clone)
 
-            ctx = saved:clone()
-            start_pos = start_pos + 1
-            ctx.pos = start_pos
-        end
-        ctx:terminate()
+        ctx:next_char()
+      end
+      ctx:terminate()
     end)
 ]]
   end,
   fromstart = function(ctx)
     return [[
     add(function(ctx) -- fromstart
-        if ctx.pos > 1 + utf8len(ctx.str) then
+        if ctx.byte_pos > 1 + ctx.len then
           return
         end
         ctx.result.start = ctx.pos
