@@ -32,16 +32,12 @@ local test_next_char = (function()
 
   assert_equals(1, ctx_en.pos)
   assert_equals(1, ctx_ru.pos)
-  assert_equals(1, ctx_en.byte_pos)
-  assert_equals(1, ctx_ru.byte_pos)
 
   ctx_ru:next_char()
   ctx_en:next_char()
 
   assert_equals(2, ctx_en.pos)
   assert_equals(2, ctx_ru.pos)
-  assert_equals(2, ctx_en.byte_pos)
-  assert_equals(3, ctx_ru.byte_pos)
 
   assert_equals('s', ctx_en:get_char())
   assert_equals('ы', ctx_ru:get_char())
@@ -61,8 +57,6 @@ local test_clone = (function()
 
   assert_equals('a', clone:get_char())
   assert_equals('s', ctx_en:get_char())
-  assert_equals(1, clone.byte_pos)
-  assert_equals(2, ctx_en.byte_pos)
 
 end)()
 
@@ -76,8 +70,8 @@ local test_last_char = (function()
   ctx_ru:next_char()
   ctx_en:next_char()
 
-  assert_equals(5, ctx_en.byte_pos)
-  assert_equals(#'фыва' + 1, ctx_ru.byte_pos)
+  assert_equals(5, ctx_en.pos)
+  assert_equals(5, ctx_ru.pos)
 
   assert_equals("", ctx_en:get_char())
   assert_equals("", ctx_ru:get_char())

@@ -11,7 +11,7 @@ local matchers = {
     local prev_charcode = ctx:get_charcode() or 0
     ctx:next_char()
     local charcode = ctx:get_charcode() or 0
-    debug("frontier pos", ctx.pos, "prev_charcode", prev_charcode, "charcode", charcode)
+    -- debug("frontier pos", ctx.pos, "prev_charcode", prev_charcode, "charcode", charcode)
     if ]] .. class_name .. [[:test(prev_charcode) then return end
     if ]] .. class_name .. [[:test(charcode) then
       ctx:next_function()

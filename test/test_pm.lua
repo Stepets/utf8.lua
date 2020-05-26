@@ -25,7 +25,6 @@ SOFTWARE.
 local utf8 = require 'init'
 utf8.config = {
   debug = nil, --utf8:require("util").debug,
-  -- primitives = 'primitives.dummy'
 }
 utf8:init()
 

@@ -89,34 +89,38 @@ function builder:include(b)
 end
 
 function builder:build()
-  local codes_list = table.concat(self.codes or {}, ', ')
-  local ranges_list = ''
-  for i, r in ipairs(self.ranges or {}) do ranges_list = ranges_list .. (i > 1 and ', {' or '{') .. tostring(r[1]) .. ', ' .. tostring(r[2]) .. '}' end
-  local classes_list = ''
-  if self.classes then classes_list = "'" .. table.concat(self.classes, "', '") .. "'" end
-  local not_classes_list = ''
-  if self.not_classes then not_classes_list = "'" .. table.concat(self.not_classes, "', '") .. "'" end
+  if self.codes and #self.codes == 1 and not self.inverted and not self.ranges and not self.classes and not self.not_classes and not self.includes then
+    return "{test = function(self, cc) return cc == " .. self.codes[1] .. " end}"
+  else
+    local codes_list = table.concat(self.codes or {}, ', ')
+    local ranges_list = ''
+    for i, r in ipairs(self.ranges or {}) do ranges_list = ranges_list .. (i > 1 and ', {' or '{') .. tostring(r[1]) .. ', ' .. tostring(r[2]) .. '}' end
+    local classes_list = ''
+    if self.classes then classes_list = "'" .. table.concat(self.classes, "', '") .. "'" end
+    local not_classes_list = ''
+    if self.not_classes then not_classes_list = "'" .. table.concat(self.not_classes, "', '") .. "'" end
 
-  local subs_list = ''
-  for i, r in ipairs(self.includes or {}) do subs_list = subs_list .. (i > 1 and ', ' or '') .. r:build() .. '' end
+    local subs_list = ''
+    for i, r in ipairs(self.includes or {}) do subs_list = subs_list .. (i > 1 and ', ' or '') .. r:build() .. '' end
 
-  local src = [[cl.new():with_codes(
-      ]] .. codes_list .. [[
-    ):with_ranges(
-      ]] .. ranges_list .. [[
-    ):with_classes(
-      ]] .. classes_list .. [[
-    ):without_classes(
-      ]] .. not_classes_list .. [[
-    ):with_subs(
-      ]] .. subs_list .. [[
-    )]]
+    local src = [[cl.new():with_codes(
+        ]] .. codes_list .. [[
+      ):with_ranges(
+        ]] .. ranges_list .. [[
+      ):with_classes(
+        ]] .. classes_list .. [[
+      ):without_classes(
+        ]] .. not_classes_list .. [[
+      ):with_subs(
+        ]] .. subs_list .. [[
+      )]]
 
-  if self.inverted then
-    src = src .. ':invert()'
+    if self.inverted then
+      src = src .. ':invert()'
+    end
+
+    return src
   end
-
-  return src
 end
 
 return builder

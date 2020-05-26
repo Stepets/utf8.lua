@@ -4,9 +4,9 @@ local matchers = {
   sliding = function()
     return [[
     add(function(ctx) -- sliding
-      while ctx.byte_pos <= 1 + ctx.len do
+      while ctx.pos <= ctx.len do
         local clone = ctx:clone()
-        debug('starting from', clone, "start_pos", clone.pos)
+        -- debug('starting from', clone, "start_pos", clone.pos)
         clone.result.start = clone.pos
         clone:next_function()
         clone:get_function()(clone)
@@ -20,7 +20,7 @@ local matchers = {
   fromstart = function(ctx)
     return [[
     add(function(ctx) -- fromstart
-        if ctx.byte_pos > 1 + ctx.len then
+        if ctx.byte_pos > ctx.len then
           return
         end
         ctx.result.start = ctx.pos

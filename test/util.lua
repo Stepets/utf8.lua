@@ -3,7 +3,9 @@ require "test.strict"
 local function equals(t1, t2)
   for k,v in pairs(t1) do
     if t2[k] == nil then return false end
-    if type(t2[k]) == 'table' and type(v) == 'table' then
+    if type(t2[k]) == 'cdata' and type(v) == 'cdata' then
+      return true -- don't know how to compare
+    elseif type(t2[k]) == 'table' and type(v) == 'table' then
       if not equals(t2[k], v) then return false end
     else
       if t2[k] ~= v then return false end
@@ -11,7 +13,9 @@ local function equals(t1, t2)
   end
   for k,v in pairs(t2) do
     if t1[k] == nil then return false end
-    if type(t1[k]) == 'table' and type(v) == 'table' then
+    if type(t1[k]) == 'cdata' and type(v) == 'cdata' then
+      return true -- don't know how to compare
+    elseif type(t1[k]) == 'table' and type(v) == 'table' then
       if not equals(t1[k], v) then return false end
     else
       if t1[k] ~= v then return false end

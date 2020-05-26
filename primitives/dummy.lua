@@ -80,8 +80,14 @@ local function utf8symbollen(byte)
   return not byte and 0 or (byte < 0x80 and 1) or (byte >= 0xF0 and 4) or (byte >= 0xE0 and 3) or (byte >= 0xC0 and 2) or 1
 end
 
+local head_table = utf8.config.int32array(256)
+for i = 0, 255 do
+  head_table[i] = utf8symbollen(i)
+end
+head_table[256] = 0
+
 local function utf8charbytes(str, bs)
-  return utf8symbollen(byte(str, bs))
+  return head_table[byte(str, bs) or 256]
 end
 
 local function utf8next(str, bs)
@@ -201,13 +207,12 @@ utf8unicode = function(str, ibs, jbs)
 
   bytes = utf8charbytes(str, ibs)
   if bytes == 0 then return end
-  ch  = sub(str,ibs,ibs-1+bytes)
 
   local unicode
 
-  if bytes == 1 then unicode = byte(ch) end
+  if bytes == 1 then unicode = byte(str, ibs, ibs) end
   if bytes == 2 then
-    local byte0,byte1 = byte(ch,1,2)
+    local byte0,byte1 = byte(str, ibs, ibs + 1)
     if byte0 and byte1 then
       local code0,code1 = byte0-0xC0,byte1-0x80
       unicode = code0*shift_6 + code1
@@ -216,7 +221,7 @@ utf8unicode = function(str, ibs, jbs)
     end
   end
   if bytes == 3 then
-    local byte0,byte1,byte2 = byte(ch,1,3)
+    local byte0,byte1,byte2 = byte(str, ibs, ibs + 2)
     if byte0 and byte1 and byte2 then
       local code0,code1,code2 = byte0-0xE0,byte1-0x80,byte2-0x80
       unicode = code0*shift_12 + code1*shift_6 + code2
@@ -225,7 +230,7 @@ utf8unicode = function(str, ibs, jbs)
     end
   end
   if bytes == 4 then
-    local byte0,byte1,byte2,byte3 = byte(ch,1,4)
+    local byte0,byte1,byte2,byte3 = byte(str, ibs, ibs + 3)
     if byte0 and byte1 and byte2 and byte3 then
       local code0,code1,code2,code3 = byte0-0xF0,byte1-0x80,byte2-0x80,byte3-0x80
       unicode = code0*shift_18 + code1*shift_12 + code2*shift_6 + code3
@@ -234,7 +239,11 @@ utf8unicode = function(str, ibs, jbs)
     end
   end
 
-  return unicode,utf8unicode(str, ibs+bytes, jbs)
+  if ibs == jbs then
+    return unicode
+  else
+    return unicode,utf8unicode(str, ibs+bytes, jbs)
+  end
 end
 
 local function utf8byte(str, i, j)

@@ -142,7 +142,7 @@ end
 
 function class:test(char_code)
   local result = self:do_test(char_code)
-  utf8.debug('class:test', result, "'" .. (char_code and utf8.char(char_code) or 'nil') .. "'", char_code)
+  -- utf8.debug('class:test', result, "'" .. (char_code and utf8.char(char_code) or 'nil') .. "'", char_code)
   return result
 end
 

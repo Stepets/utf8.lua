@@ -8,6 +8,7 @@ local utf8len = utf8.len
 local utf8next = utf8.next
 local rawgsub = utf8.raw.gsub
 local utf8offset = utf8.offset
+local utf8char = utf8.char
 
 local util = utf8.util
 
@@ -28,23 +29,37 @@ function ctx.new(obj)
   obj = obj or {}
   local res = setmetatable({
     pos = obj.pos or 1,
-    byte_pos = obj.byte_pos,
-    prev_byte_pos = obj.prev_byte_pos,
+    byte_pos = obj.pos or 1,
     str = assert(obj.str, "str is required"),
-    len = obj.len or utf8.raw.len(obj.str),
+    len = obj.len,
+    rawlen = obj.rawlen,
+    bytes = obj.bytes,
+    offsets = obj.offsets,
     starts = obj.starts or nil,
     functions = obj.functions or {},
     func_pos = obj.func_pos or 1,
     ends = obj.ends or nil,
     result = obj.result and util.copy(obj.result) or {},
     captures = obj.captures and util.copy(obj.captures, true) or {active = {}},
+    modified = false,
   }, mt)
-  if not res.byte_pos then
-    res.pos = 0
-    res.byte_pos = 0
-    for i = 1, (obj.pos or 1) do
-      res:next_char()
+  if not res.bytes then
+    local str = res.str
+    local l = #str
+    local bytes = utf8.config.int32array(l)
+    local offsets = utf8.config.int32array(l)
+    local c, bs, i = nil, 1, 1
+    while bs <= l do
+      bytes[i] = utf8unicode(str, bs, bs)
+      offsets[i] = bs
+      bs = utf8.next(str, bs)
+      i = i + 1
     end
+    res.bytes = bytes
+    res.offsets = offsets
+    res.byte_pos = res.pos
+    res.len = i
+    res.rawlen = l
   end
 
   return res
@@ -56,38 +71,22 @@ end
 
 function ctx:next_char()
   self.pos = self.pos + 1
-  self.prev_byte_pos = self.byte_pos
-  self.byte_pos = math.max(utf8.next(self.str, self.byte_pos), self.byte_pos + 1)
+  self.byte_pos = self.pos
 end
 
 function ctx:prev_char()
   self.pos = self.pos - 1
-  if self.prev_byte_pos then
-    self.byte_pos = self.prev_byte_pos
-    self.prev_byte_pos = nil
-  else
-    self.byte_pos = self.byte_pos - 1
-    while true do
-      local b = byte(self.str, self.byte_pos)
-      if not b or (0 < b and b < 127)
-      or (194 < b and b < 244) then
-        return
-      end
-      self.byte_pos = self.byte_pos - 1
-      if self.byte_pos < 1 then
-        return
-      end
-    end
-  end
+  self.byte_pos = self.pos
 end
 
 function ctx:get_char()
-  return sub(self.str, self.byte_pos, utf8.next(self.str, self.byte_pos) - 1)
+  if self.len <= self.pos then return "" end
+  return utf8char(self.bytes[self.pos])
 end
 
 function ctx:get_charcode()
-  if self.len < self.byte_pos then return nil end
-  return utf8unicode(self.str, self.byte_pos, self.byte_pos)
+  if self.len <= self.pos then return nil end
+  return self.bytes[self.pos]
 end
 
 function ctx:next_function()

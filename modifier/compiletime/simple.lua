@@ -7,7 +7,7 @@ local matchers = {
   local ]] .. class_name .. [[ = ]] .. class .. [[
 
   add(function(ctx) -- simple
-    debug(ctx, 'simple', ']] .. class_name .. [[')
+    -- debug(ctx, 'simple', ']] .. class_name .. [[')
     if ]] .. class_name .. [[:test(ctx:get_charcode()) then
       ctx:next_char()
       ctx:next_function()
