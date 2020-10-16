@@ -516,8 +516,8 @@ end
 
 utf8.charpattern = '[\0-\127\194-\244][\128-\191]*'
 utf8.offset = utf8offset
-local ok, utf8_53 = pcall(require, "utf8")
-if ok then
+if _VERSION == 'Lua 5.3' then
+  local utf8_53 = require "utf8"
   utf8.codes = utf8_53.codes
   utf8.codepoint = utf8_53.codepoint
   utf8.len53 = utf8_53.len
