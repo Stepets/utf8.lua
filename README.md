@@ -60,3 +60,16 @@ utf8:init()
 Customization is done before initialization. If you want, you can change configuration after `init`, it might work for everything but modules. All of them should be reloaded.
 
 #### [Documentation:](test/test.lua)
+
+#### Issue reporting:
+
+Please provide example script that causes error together with environment description and debug output. Debug output can be obtained like:
+```Lua
+local utf8 = require('.utf8')
+utf8.config = {
+  debug = utf8:require("util").debug
+}
+utf8:init()
+-- your code
+```
+Default logger used is [`io.write`](https://www.lua.org/manual/5.3/manual.html#pdf-io.write) and can be changed by specifying `logger = my_logger` in configuration
