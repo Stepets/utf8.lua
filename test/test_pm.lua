@@ -30,11 +30,13 @@ utf8:init()
 
 print('testing pattern matching')
 
+local
 function f(s, p)
   local i,e = utf8.find(s, p)
   if i then return utf8.sub(s, i, e) end
 end
 
+local
 function f1(s, p)
   p = utf8.gsub(p, "%%([0-9])", function (s) return "%" .. (tonumber(s)+1) end)
   p = utf8.gsub(p, "^(^?)", "%1()", 1)
@@ -43,6 +45,7 @@ function f1(s, p)
   return utf8.sub(s, t[1], t[#t] - 1)
 end
 
+local
 a,b = utf8.find('', '')    -- empty patterns are tricky
 assert(a == 1 and b == 0);
 a,b = utf8.find('alo', '')
@@ -132,11 +135,14 @@ local abc = utf8.char(range(0, 255));
 assert(utf8.len(abc) == 256)
 assert(string.len(abc) == 384)
 
+local
 function strset (p)
   local res = {s=''}
   utf8.gsub(abc, p, function (c) res.s = res.s .. c end)
   return res.s
 end;
+
+local a, b, c, d, e, t
 
 -- local E = utf8.escape
 -- assert(utf8.len(strset(E'[%200-%210]')) == 11)
@@ -157,7 +163,7 @@ assert(utf8.match("254 K", "(%d*)K") == "")
 assert(utf8.match("alo ", "(%w*)$") == "")
 assert(utf8.match("alo ", "(%w+)$") == nil)
 assert(utf8.find("(álo)", "%(á") == 1)
-local a, b, c, d, e = utf8.match("âlo alo", "^(((.).).* (%w*))$")
+a, b, c, d, e = utf8.match("âlo alo", "^(((.).).* (%w*))$")
 assert(a == 'âlo alo' and b == 'âl' and c == 'â' and d == 'alo' and e == nil)
 a, b, c, d  = utf8.match('0123456789', '(.+(.?)())')
 assert(a == '0123456789' and b == '' and c == 11 and d == nil)
@@ -200,9 +206,10 @@ assert(utf8.gsub("alo $a=1$ novamente $return a$", "$([^$]*)%$", dostring) ==
             "alo  novamente 1")
 
 x = utf8.gsub("$local utf8=require'init' x=utf8.gsub('alo', '.', utf8.upper)$ assim vai para $return x$",
-         "$([^$]*)%$", dostring)
+         "$([^$]*)%$", dostring2)
 assert(x == ' assim vai para ALO')
 
+local s,r
 t = {}
 s = 'a alo jose  joao'
 r = utf8.gsub(s, '()(%w+)()', function (a,w,b)
@@ -211,7 +218,7 @@ r = utf8.gsub(s, '()(%w+)()', function (a,w,b)
     end)
 assert(s == r and t[1] == 1 and t[3] == 3 and t[7] == 4 and t[13] == 4)
 
-
+local
 function isbalanced (s)
   return utf8.find(utf8.gsub(s, "%b()", ""), "[()]") == nil
 end
@@ -273,7 +280,7 @@ Stepets: ignoring this test because it's probably bug in Lua.
 -- end
 
 -- recursive nest of gsubs
-function rev (s)
+local function rev (s)
   return utf8.gsub(s, "(.)(.+)", function (c,s1) return rev(s1)..c end)
 end
 
