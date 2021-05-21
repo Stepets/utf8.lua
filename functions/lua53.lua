@@ -5,6 +5,7 @@ local utf8gensub = utf8.gensub
 local unpack = utf8.config.unpack
 local generate_matcher_function = utf8:require 'regex_parser'
 
+local
 function get_matcher_function(regex, plain)
   local res
   if utf8.config.cache then
