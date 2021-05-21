@@ -33,7 +33,7 @@ assert(utf8.sub("\000123456789", 8) == "789")
 print('+')
 
 assert(utf8.find("123456789", "345") == 3)
-a,b = utf8.find("123456789", "345")
+local a,b = utf8.find("123456789", "345")
 assert(utf8.sub("123456789", a, b) == "345")
 assert(utf8.find("1234567890123456789", "345", 3) == 3)
 assert(utf8.find("1234567890123456789", "345", 4) == 13)
@@ -102,7 +102,7 @@ print('+')
 do
   local f = utf8.gmatch("1 2 3 4 5", "%d+")
   assert(f() == "1")
-  co = coroutine.wrap(f)
+  local co = coroutine.wrap(f)
   assert(co() == "2")
 end
 
