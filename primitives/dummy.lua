@@ -492,7 +492,13 @@ local function utf8offset(str, n, bs)
 end
 
 local function utf8replace (s, mapping)
-  return s:gsub( utf8charpattern, mapping )
+  if type(s) ~= "string" then
+    error("bad argument #1 to 'utf8replace' (string expected, got ".. type(s).. ")")
+  end
+  if type(mapping) ~= "table" then
+    error("bad argument #2 to 'utf8replace' (table expected, got ".. type(mapping).. ")")
+  end
+  return utf8.raw.gsub( s, utf8charpattern, mapping )
 end
 
 local function utf8upper (s)
