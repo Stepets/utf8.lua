@@ -17,7 +17,7 @@ end
 
 utf8:require "primitives.dummy"
 
-if not utf8.conversion.uc_lc then
+if not utf8.config.conversion.uc_lc then
   function utf8.lower(str)
     local bs = 1
     local nbs
@@ -35,7 +35,7 @@ if not utf8.conversion.uc_lc then
   end
 end
 
-if not utf8.conversion.lc_uc then
+if not utf8.config.conversion.lc_uc then
   function utf8.upper(str)
     local bs = 1
     local nbs

@@ -502,18 +502,18 @@ local function utf8replace (s, mapping)
 end
 
 local function utf8upper (s)
-  return utf8replace(s, utf8.conversion.lc_uc)
+  return utf8replace(s, utf8.config.conversion.lc_uc)
 end
 
-if utf8.conversion.lc_uc then
+if utf8.config.conversion.lc_uc then
   upper = utf8upper
 end
 
 local function utf8lower (s)
-  return utf8replace(s, utf8.conversion.uc_lc)
+  return utf8replace(s, utf8.config.conversion.uc_lc)
 end
 
-if utf8.conversion.uc_lc then
+if utf8.config.conversion.uc_lc then
   lower = utf8lower
 end
 
