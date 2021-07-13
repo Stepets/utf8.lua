@@ -498,7 +498,8 @@ local function utf8replace (s, mapping)
   if type(mapping) ~= "table" then
     error("bad argument #2 to 'utf8replace' (table expected, got ".. type(mapping).. ")")
   end
-  return utf8.raw.gsub( s, utf8charpattern, mapping )
+  local result = utf8.raw.gsub( s, utf8charpattern, mapping )
+  return result
 end
 
 local function utf8upper (s)
