@@ -12,11 +12,6 @@
 -- * utf8gmatch(str, regex, all)
 -- * utf8gsub(str, regex, repl, limit)
 --
--- If utf8data.lua (containing the lower<->upper case mappings) is loaded, these
--- additional functions are available:
--- * utf8upper(s)
--- * utf8lower(s)
---
 -- All functions behave as their non UTF-8 aware counterparts with the exception
 -- that UTF-8 characters are used instead of bytes for all units.
 

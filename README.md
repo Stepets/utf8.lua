@@ -65,7 +65,7 @@ local utf8 = require('.utf8')
 utf8.config = {
   conversion = {
     uc_lc = utf8_uc_lc,
-	lc_uc = utf8_lc_uc
+    lc_uc = utf8_lc_uc
   },
 }
 utf8:init()
