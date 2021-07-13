@@ -25,7 +25,11 @@ local utf8 = {
       else
         return {}
       end
-    end
+    end,
+    conversion = {
+      uc_lc = nil,
+      lc_uc = nil
+    }
   },
   regex = {
     compiletime = {

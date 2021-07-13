@@ -76,6 +76,8 @@ local rep     = string.rep
 local sub     = string.sub
 local upper   = string.upper
 
+local utf8charpattern = '[\0-\127\194-\244][\128-\191]*'
+
 local function utf8symbollen(byte)
   return not byte and 0 or (byte < 0x80 and 1) or (byte >= 0xF0 and 4) or (byte >= 0xE0 and 3) or (byte >= 0xC0 and 2) or 1
 end
@@ -494,6 +496,26 @@ local function utf8offset(str, n, bs)
 
 end
 
+local function utf8replace (s, mapping)
+  return s:gsub( utf8charpattern, mapping )
+end
+
+local function utf8upper (s)
+  return utf8replace(s, utf8.conversion.lc_uc)
+end
+
+if utf8.conversion.lc_uc then
+  upper = utf8upper
+end
+
+local function utf8lower (s)
+  return utf8replace(s, utf8.conversion.uc_lc)
+end
+
+if utf8.conversion.uc_lc then
+  lower = utf8lower
+end
+
 utf8.len       = utf8len
 utf8.sub       = utf8sub
 utf8.reverse   = utf8reverse
@@ -514,7 +536,7 @@ for k,v in pairs(string) do
   utf8.raw[k] = v
 end
 
-utf8.charpattern = '[\0-\127\194-\244][\128-\191]*'
+utf8.charpattern = utf8charpattern
 utf8.offset = utf8offset
 if _VERSION == 'Lua 5.3' then
   local utf8_53 = require "utf8"

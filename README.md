@@ -57,6 +57,19 @@ utf8.config = {
 }
 utf8:init()
 ```
+
+For `lower` and `upper` functions to work in environments where `ffi` cannot be used, you can specify substitution tables ([data example](https://github.com/artemshein/luv/blob/master/utf8data.lua))
+
+```Lua
+local utf8 = require('.utf8')
+utf8.config = {
+  conversion = {
+    uc_lc = utf8_uc_lc,
+	lc_uc = utf8_lc_uc
+  },
+}
+utf8:init()
+```
 Customization is done before initialization. If you want, you can change configuration after `init`, it might work for everything but modules. All of them should be reloaded.
 
 #### [Documentation:](test/test.lua)
