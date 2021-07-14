@@ -71,7 +71,7 @@ local rep     = string.rep
 local sub     = string.sub
 local upper   = string.upper
 
-local utf8charpattern = '[\0-\127\194-\244][\128-\191]*'
+local utf8charpattern = '[%z\1-\127\194-\244][\128-\191]*'
 
 local function utf8symbollen(byte)
   return not byte and 0 or (byte < 0x80 and 1) or (byte >= 0xF0 and 4) or (byte >= 0xE0 and 3) or (byte >= 0xC0 and 2) or 1
