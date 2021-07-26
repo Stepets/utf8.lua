@@ -206,7 +206,7 @@ assert(utf8.gsub("alo $a=1$ novamente $return a$", "$([^$]*)%$", dostring) ==
             "alo  novamente 1")
 
 x = utf8.gsub("$local utf8=require'init' x=utf8.gsub('alo', '.', utf8.upper)$ assim vai para $return x$",
-         "$([^$]*)%$", dostring2)
+         "$([^$]*)%$", dostring)
 assert(x == ' assim vai para ALO')
 
 local s,r
