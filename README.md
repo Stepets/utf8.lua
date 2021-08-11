@@ -43,6 +43,8 @@ Please note that library assumes regexes are valid UTF-8 strings, if you need to
 
 Download repository to your project folder. (no rockspecs yet)
 
+Examples assume library placed under `utf8` subfolder not `utf8.lua`.
+
 As of Lua 5.3 default `utf8` module has precedence over user-provided. In this case you can specify full module path (`.utf8`).
 
 #### Configuration:
