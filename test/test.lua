@@ -1,8 +1,10 @@
 local utf8 = require('init')
 utf8.config = {
-  debug = nil, --utf8:require("util").debug
+  debug = nil,
+--   debug = utf8:require("util").debug,
 }
 utf8:init()
+
 for k,v in pairs(utf8) do
   string[k] = v
 end

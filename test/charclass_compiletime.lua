@@ -1,6 +1,7 @@
 local utf8 = require "init"
 utf8.config = {
-  debug = nil, --utf8:require("util").debug
+  debug = nil,
+--   debug = utf8:require("util").debug,
 }
 utf8:init()
 

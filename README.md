@@ -36,6 +36,9 @@ utf8.raw.gsub(str, "ло+", "보라")
 
 It also provides all functions from Lua 5.3 UTF-8 [module](https://www.lua.org/manual/5.3/manual.html#6.5) except `utf8.len (s [, i [, j]])`. If you need to validate your strings use `utf8.validate(str, byte_pos)` or iterate over with `utf8.validator`.
 
+Please note that library assumes regexes are valid UTF-8 strings, if you need to manipulate individual bytes use vanilla functions under `utf8.raw`.
+
+
 #### Installation:
 
 Download repository to your project folder. (no rockspecs yet)

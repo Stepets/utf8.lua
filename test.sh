@@ -12,7 +12,8 @@ for test in \
   test/context_runtime.lua \
   test/test.lua \
   test/test_compat.lua \
-  test/test_pm.lua
+  test/test_pm.lua \
+  test/test_utf8data.lua
 do
   $lua53 $test
   $lua51 $test
