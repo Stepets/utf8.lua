@@ -2,27 +2,31 @@ return function(utf8)
 
 local utf8sub = utf8.sub
 local utf8gensub = utf8.gensub
+local rawfind = utf8.raw.find
 local unpack = utf8.config.unpack
 local generate_matcher_function = utf8:require 'regex_parser'
 
 local
-function get_matcher_function(regex, plain)
+function get_matcher_function(regex)
   local res
   if utf8.config.cache then
-    res = utf8.config.cache[plain and "plain" or "regex"][regex]
+    res = utf8.config.cache[regex]
   end
   if res then
     return res
   end
-  res = generate_matcher_function(regex, plain)
+  res = generate_matcher_function(regex)
   if utf8.config.cache then
-    utf8.config.cache[plain and "plain" or "regex"][regex] = res
+    utf8.config.cache[regex] = res
   end
   return res
 end
 
 local function utf8find(str, regex, init, plain)
-  local func = get_matcher_function(regex, plain)
+  if plain then
+    return rawfind(str, regex, init, plain)
+  end
+  local func = get_matcher_function(regex)
   init = ((init or 1) < 0) and (utf8.len(str) + init + 1) or init
   local ctx, result, captures = func(str, init, utf8)
   if not ctx then return nil end
@@ -35,7 +39,7 @@ local function utf8find(str, regex, init, plain)
 end
 
 local function utf8match(str, regex, init)
-  local func = get_matcher_function(regex, false)
+  local func = get_matcher_function(regex)
   init = ((init or 1) < 0) and (utf8.len(str) + init + 1) or init
   local ctx, result, captures = func(str, init, utf8)
   if not ctx then return nil end
@@ -51,7 +55,7 @@ end
 
 local function utf8gmatch(str, regex)
   regex = (utf8sub(regex,1,1) ~= '^') and regex or '%' .. regex
-  local func = get_matcher_function(regex, false)
+  local func = get_matcher_function(regex)
   local ctx, result, captures
   local continue_pos = 1
 
@@ -108,7 +112,7 @@ local function utf8gsub(str, regex, repl, limit)
   local subbed = ''
   local prev_sub_finish = 1
 
-  local func = get_matcher_function(regex, false)
+  local func = get_matcher_function(regex)
   local ctx, result, captures
   local continue_pos = 1
 

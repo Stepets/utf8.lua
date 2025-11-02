@@ -10,14 +10,9 @@ local utf8 = {
     logger = io.write,
     loadstring = (loadstring or load),
     unpack = (unpack or table.unpack),
-    cache = {
-      regex = setmetatable({},{
+    cache = setmetatable({},{
         __mode = 'kv'
-      }),
-      plain = setmetatable({},{
-        __mode = 'kv'
-      }),
-    },
+    }),
     locale = nil,
     int32array = function(size)
       if ffi_enabled then

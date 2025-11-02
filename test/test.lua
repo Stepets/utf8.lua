@@ -202,4 +202,7 @@ assert_equals({"ab", 1}, {("ab"):gsub("a", "%1")})
 
 assert_equals("c", ("abc"):match("c", -1))
 
+-- https://github.com/Stepets/utf8.lua/issues/16
+assert_equals(nil, ("aabb"):find(".", 1, true))
+
 print("\ntests passed\n")

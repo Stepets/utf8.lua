@@ -10,7 +10,7 @@ local sub = utf8.sub
 
 local parser_context = utf8:require "context.compiletime"
 
-return function(regex, plain)
+return function(regex)
   utf8.debug("regex", regex)
   local ctx = parser_context:new()
 
@@ -74,7 +74,7 @@ return function(regex, plain)
 
   utf8.debug(regex, src)
 
-  return assert(utf8.config.loadstring(src, (plain and "plain " or "") .. regex))()
+  return assert(utf8.config.loadstring(src, regex))()
 end
 
 end
